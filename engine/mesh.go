@@ -3,6 +3,7 @@ package engine
 import (
 	"github.com/mumax/3/cuda"
 	"github.com/mumax/3/data"
+	"fmt"
 )
 
 var globalmesh_ data.Mesh // mesh for m and everything that has the same size
@@ -113,12 +114,17 @@ func SetMesh(Nx, Ny, Nz int, cellSizeX, cellSizeY, cellSizeZ float64, pbcx, pbcy
 		// first time mesh is set
 		for _,b := range blacklist {
 			if Nx == b {
+				cellSizeX = cellSizeX * float64(Nx) / float64(Nx + 1)
 				Nx += 1
-			}  
+				fmt.Println("******** FIXING THE MESH ********")
+				fmt.Println("New mesh:",Nx,Ny,Nz,cellSizeX,cellSizeY,cellSizeZ)
+				}  
 			if Ny == b {
+				cellSizeY = cellSizeY * float64(Ny) / float64(Ny + 1)
 				Ny += 1
-			}  
+				}  
 			if Nz == b {
+				cellSizeZ = cellSizeZ * float64(Nz) / float64(Nz + 1)
 				Nz += 1
 			}  
 		}
