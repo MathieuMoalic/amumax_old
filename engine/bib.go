@@ -74,10 +74,7 @@ func LogUsedRefs() {
 	if !areRefsUsed() {
 		return
 	}
-	LogOut("********************************************************************//")
-	LogOut("Please cite the following references, relevant for your simulation. //")
-	LogOut("See bibtex file in output folder for justification.                 //")
-	LogOut("********************************************************************//")
+	LogOut("********************** Simulation Ended ************************//")
 	for _, bibentry := range library {
 		if bibentry.used {
 			LogOut("   * " + bibentry.shortref)
