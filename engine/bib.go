@@ -75,11 +75,11 @@ func LogUsedRefs() {
 		return
 	}
 	LogOut("********************** Simulation Ended ************************//")
-	for _, bibentry := range library {
-		if bibentry.used {
-			LogOut("   * " + bibentry.shortref)
-		}
-	}
+	// for _, bibentry := range library {
+	// 	if bibentry.used {
+	// 		LogOut("   * " + bibentry.shortref)
+	// 	}
+	// }
 }
 
 func buildLibrary() {
