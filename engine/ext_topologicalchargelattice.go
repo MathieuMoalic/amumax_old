@@ -14,7 +14,6 @@ var (
 )
 
 func SetTopologicalChargeDensityLattice(dst *data.Slice) {
-	Refer("Berg1981")
 	cuda.SetTopologicalChargeLattice(dst, M.Buffer(), M.Mesh())
 }
 

@@ -80,12 +80,6 @@ func (b *thermField) update() {
 		return
 	}
 
-	if FixDt == 0 {
-		Refer("leliaert2017")
-		//uncomment to not allow adaptive step
-		//util.Fatal("Finite temperature requires fixed time step. Set FixDt != 0.")
-	}
-
 	N := Mesh().NCell()
 	k2_VgammaDt := 2 * mag.Kb / (GammaLL * cellVolume() * Dt_si)
 	noise := cuda.Buffer(1, Mesh().Size())

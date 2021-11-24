@@ -12,7 +12,6 @@ func init() {
 }
 
 func Voronoi3d(grainsize float64, startRegion int, numRegions int, inputShape Shape, seed int) {
-	Refer("Lel2014")
 	SetBusy(true)
 	defer SetBusy(false)
 
