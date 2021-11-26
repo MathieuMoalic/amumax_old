@@ -19,7 +19,7 @@ var (
 	AnisC2     = NewVectorParam("anisC2", "", "Cubic anisotorpy directon #2")
 	B_anis     = NewVectorField("B_anis", "T", "Anisotropy field", AddAnisotropyField)
 	Edens_anis = NewScalarField("Edens_anis", "J/m3", "Anisotropy energy density", AddAnisotropyEnergyDensity)
-	E_anis     = NewScalarValue("E_anis", "J", "total anisotropy energy", GetAnisotropyEnergy)
+	E_anis     = NewScalarValue("E_anis", "J", "Total anisotropy energy", GetAnisotropyEnergy)
 )
 
 var (
