@@ -6,8 +6,8 @@ import (
 	_ "image/png"
 	"math"
 
-	"amumax/httpfs"
-	"amumax/util"
+	"github.com/MathieuMoalic/amumax/httpfs"
+	"github.com/MathieuMoalic/amumax/util"
 )
 
 func init() {

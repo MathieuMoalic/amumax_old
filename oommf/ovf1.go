@@ -3,7 +3,7 @@ package oommf
 import (
 	"encoding/binary"
 	"fmt"
-	"amumax/data"
+	"github.com/MathieuMoalic/amumax/data"
 	"io"
 	"log"
 	"strings"

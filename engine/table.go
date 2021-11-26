@@ -11,12 +11,12 @@ import (
 	"sync"
 	"time"
 
-	"amumax/cuda"
-	"amumax/data"
-	"amumax/httpfs"
-	"amumax/script"
-	"amumax/timer"
-	"amumax/util"
+	"github.com/MathieuMoalic/amumax/cuda"
+	"github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/httpfs"
+	"github.com/MathieuMoalic/amumax/script"
+	"github.com/MathieuMoalic/amumax/timer"
+	"github.com/MathieuMoalic/amumax/util"
 )
 
 var Table = *newTable("table") // output handle for tabular data (average magnetization etc.)

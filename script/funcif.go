@@ -3,7 +3,7 @@ package script
 // Here be dragons
 
 import (
-	"amumax/data"
+	"github.com/MathieuMoalic/amumax/data"
 	"reflect"
 )
 

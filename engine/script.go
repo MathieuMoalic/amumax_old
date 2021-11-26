@@ -3,8 +3,8 @@ package engine
 // declare functionality for interpreted input scripts
 
 import (
-	"amumax/httpfs"
-	"amumax/script"
+	"github.com/MathieuMoalic/amumax/httpfs"
+	"github.com/MathieuMoalic/amumax/script"
 	"reflect"
 )
 

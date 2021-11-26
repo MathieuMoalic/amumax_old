@@ -8,10 +8,10 @@ import (
 
 	"github.com/DataDog/zstd" 
 	
-	"amumax/cuda"
-	"amumax/httpfs"
-	"amumax/data"
-	"amumax/util"
+	"github.com/MathieuMoalic/amumax/cuda"
+	"github.com/MathieuMoalic/amumax/httpfs"
+	"github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/util"
 )
 
 func init() {

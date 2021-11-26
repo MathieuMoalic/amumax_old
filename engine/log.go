@@ -2,8 +2,8 @@ package engine
 
 import (
 	"fmt"
-	"amumax/httpfs"
-	"amumax/util"
+	"github.com/MathieuMoalic/amumax/httpfs"
+	"github.com/MathieuMoalic/amumax/util"
 	"io"
 	"os"
 )

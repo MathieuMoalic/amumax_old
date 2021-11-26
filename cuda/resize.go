@@ -1,8 +1,8 @@
 package cuda
 
 import (
-	"amumax/data"
-	"amumax/util"
+	"github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/util"
 )
 
 // Select and resize one layer for interactive output

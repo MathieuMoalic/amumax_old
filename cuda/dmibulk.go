@@ -3,8 +3,8 @@ package cuda
 import (
 	"unsafe"
 
-	"amumax/data"
-	"amumax/util"
+	"github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/util"
 )
 
 // Add effective field due to bulk Dzyaloshinskii-Moriya interaction to Beff.

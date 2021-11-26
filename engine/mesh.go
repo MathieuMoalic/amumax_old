@@ -1,8 +1,8 @@
 package engine
 
 import (
-	"amumax/cuda"
-	"amumax/data"
+	"github.com/MathieuMoalic/amumax/cuda"
+	"github.com/MathieuMoalic/amumax/data"
 )
 
 var globalmesh_ data.Mesh // mesh for m and everything that has the same size

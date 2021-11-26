@@ -3,8 +3,8 @@ package engine
 import (
 	"math"
 
-	"amumax/cuda"
-	"amumax/data"
+	"github.com/MathieuMoalic/amumax/cuda"
+	"github.com/MathieuMoalic/amumax/data"
 )
 
 var (

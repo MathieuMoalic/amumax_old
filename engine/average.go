@@ -3,8 +3,8 @@ package engine
 // Averaging of quantities over entire universe or just magnet.
 
 import (
-	"amumax/cuda"
-	"amumax/data"
+	"github.com/MathieuMoalic/amumax/cuda"
+	"github.com/MathieuMoalic/amumax/data"
 )
 
 // average of quantity over universe

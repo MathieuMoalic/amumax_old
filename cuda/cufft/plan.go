@@ -10,7 +10,7 @@ import "C"
 import (
 	"unsafe"
 
-	"amumax/cuda/cu"
+	"github.com/MathieuMoalic/amumax/cuda/cu"
 )
 
 // FFT plan handle, reference type to a plan

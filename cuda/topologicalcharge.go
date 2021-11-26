@@ -1,8 +1,8 @@
 package cuda
 
 import (
-	"amumax/data"
-	"amumax/util"
+	"github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/util"
 )
 
 // Set s to the toplogogical charge density s = m · (∂m/∂x ❌ ∂m/∂y)

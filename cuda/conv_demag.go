@@ -1,9 +1,9 @@
 package cuda
 
 import (
-	"amumax/cuda/cu"
-	"amumax/data"
-	"amumax/util"
+	"github.com/MathieuMoalic/amumax/cuda/cu"
+	"github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/util"
 )
 
 // Stores the necessary state to perform FFT-accelerated convolution

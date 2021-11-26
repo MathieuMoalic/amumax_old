@@ -2,7 +2,7 @@ package draw
 
 import (
 	"fmt"
-	"amumax/svgo"
+	"github.com/MathieuMoalic/amumax/svgo"
 	"io"
 	"math"
 )

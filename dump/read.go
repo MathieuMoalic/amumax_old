@@ -3,8 +3,8 @@ package dump
 
 import (
 	"fmt"
-	"amumax/data"
-	"amumax/util"
+	"github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/util"
 	"hash"
 	"hash/crc64"
 	"io"

@@ -4,8 +4,8 @@ import (
 	"testing"
 	"unsafe"
 
-	"amumax/data"
-	"amumax/util"
+	"github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/util"
 )
 
 // test input data

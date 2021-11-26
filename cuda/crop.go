@@ -1,8 +1,8 @@
 package cuda
 
 import (
-	"amumax/data"
-	"amumax/util"
+	"github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/util"
 )
 
 // Crop stores in dst a rectangle cropped from src at given offset position.

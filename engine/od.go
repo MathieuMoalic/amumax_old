@@ -5,7 +5,7 @@ package engine
 import (
 	"strings"
 
-	"amumax/httpfs"
+	"github.com/MathieuMoalic/amumax/httpfs"
 )
 
 var (

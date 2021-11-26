@@ -3,8 +3,8 @@ package cuda
 import (
 	"unsafe"
 
-	"amumax/data"
-	"amumax/util"
+	"github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/util"
 )
 
 // dst += LUT[region], for vectors. Used to add terms to excitation.

@@ -3,7 +3,7 @@ package engine
 // Relax tries to find the minimum energy state.
 
 import (
-	"amumax/cuda"
+	"github.com/MathieuMoalic/amumax/cuda"
 	"math"
 )
 

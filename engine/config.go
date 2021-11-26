@@ -3,7 +3,7 @@ package engine
 // Utilities for setting magnetic configurations.
 
 import (
-	"amumax/data"
+	"github.com/MathieuMoalic/amumax/data"
 	"math"
 	"math/rand"
 )

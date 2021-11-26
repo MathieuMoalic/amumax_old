@@ -4,8 +4,8 @@ package engine
 
 import (
 	"flag"
-	"amumax/cuda"
-	"amumax/util"
+	"github.com/MathieuMoalic/amumax/cuda"
+	"github.com/MathieuMoalic/amumax/util"
 	"os"
 	"path"
 )

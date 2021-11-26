@@ -18,7 +18,7 @@ import (
 	"text/scanner"
 	"text/template"
 
-	"amumax/util"
+	"github.com/MathieuMoalic/amumax/util"
 )
 
 func main() {
@@ -152,8 +152,8 @@ const templText = `package cuda
 
 import(
 	"unsafe"
-	"amumax/cuda/cu"
-	"amumax/timer"
+	"github.com/MathieuMoalic/amumax/cuda/cu"
+	"github.com/MathieuMoalic/amumax/timer"
 	"sync"
 )
 

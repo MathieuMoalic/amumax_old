@@ -3,8 +3,8 @@ package engine
 // Minimize follows the steepest descent method as per Exl et al., JAP 115, 17D118 (2014).
 
 import (
-	"amumax/cuda"
-	"amumax/data"
+	"github.com/MathieuMoalic/amumax/cuda"
+	"github.com/MathieuMoalic/amumax/data"
 )
 
 var (

@@ -6,8 +6,8 @@ import (
 	"log"
 	"runtime"
 
-	"amumax/cuda/cu"
-	"amumax/util"
+	"github.com/MathieuMoalic/amumax/cuda/cu"
+	"github.com/MathieuMoalic/amumax/util"
 )
 
 var (

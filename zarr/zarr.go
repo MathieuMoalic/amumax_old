@@ -7,8 +7,8 @@ import (
 	"path"
 	"encoding/json"
 	
-	"amumax/data"
-	"amumax/httpfs"
+	"github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/httpfs"
 
 	"github.com/DataDog/zstd" 
 )

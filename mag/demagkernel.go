@@ -3,10 +3,10 @@ package mag
 import (
 	"bufio"
 	"fmt"
-	"amumax/data"
-	"amumax/oommf"
-	"amumax/timer"
-	"amumax/util"
+	"github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/oommf"
+	"github.com/MathieuMoalic/amumax/timer"
+	"github.com/MathieuMoalic/amumax/util"
 	"math"
 	"os"
 )

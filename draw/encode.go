@@ -3,7 +3,7 @@ package draw
 import (
 	"bufio"
 	"fmt"
-	"amumax/data"
+	"github.com/MathieuMoalic/amumax/data"
 	"image"
 	"image/gif"
 	"image/jpeg"

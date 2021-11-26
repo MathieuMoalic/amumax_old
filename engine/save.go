@@ -6,13 +6,13 @@ import (
 	"reflect"
 	"strings"
 
-	"amumax/cuda"
-	"amumax/data"
-	"amumax/draw"
-	"amumax/dump"
-	"amumax/httpfs"
-	"amumax/oommf"
-	"amumax/util"
+	"github.com/MathieuMoalic/amumax/cuda"
+	"github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/draw"
+	"github.com/MathieuMoalic/amumax/dump"
+	"github.com/MathieuMoalic/amumax/httpfs"
+	"github.com/MathieuMoalic/amumax/oommf"
+	"github.com/MathieuMoalic/amumax/util"
 )
 
 func init() {

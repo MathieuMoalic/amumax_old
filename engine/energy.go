@@ -3,8 +3,8 @@ package engine
 // Total energy calculation
 
 import (
-	"amumax/cuda"
-	"amumax/data"
+	"github.com/MathieuMoalic/amumax/cuda"
+	"github.com/MathieuMoalic/amumax/data"
 )
 
 // TODO: Integrate(Edens)

@@ -2,7 +2,7 @@ package engine
 
 import (
 	"fmt"
-	"amumax/data"
+	"github.com/MathieuMoalic/amumax/data"
 )
 
 var (

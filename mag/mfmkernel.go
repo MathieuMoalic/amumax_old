@@ -3,9 +3,9 @@ package mag
 import (
 	"bufio"
 	"fmt"
-	d "amumax/data"
-	"amumax/oommf"
-	"amumax/util"
+	d "github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/oommf"
+	"github.com/MathieuMoalic/amumax/util"
 	"math"
 	"os"
 )

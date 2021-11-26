@@ -1,7 +1,7 @@
 package cuda
 
 import (
-	"amumax/data"
+	"github.com/MathieuMoalic/amumax/data"
 )
 
 // Add Zhang-Li ST torque (Tesla) to torque.

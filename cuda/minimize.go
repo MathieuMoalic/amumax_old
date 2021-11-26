@@ -1,7 +1,7 @@
 package cuda
 
 import (
-	"amumax/data"
+	"github.com/MathieuMoalic/amumax/data"
 )
 
 // m = 1 / (4 + τ²(m x H)²) [{4 - τ²(m x H)²} m - 4τ(m x m x H)]

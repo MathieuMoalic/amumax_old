@@ -6,8 +6,8 @@ import (
 	"log"
 	"math"
 
-	"amumax/data"
-	"amumax/util"
+	"github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/util"
 )
 
 // Output size of R2C FFT with given logic size, expressed in floats.

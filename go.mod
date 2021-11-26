@@ -1,4 +1,4 @@
-module AMUmax
+module github.com/MathieuMoalic/amumax
 
 go 1.16
 

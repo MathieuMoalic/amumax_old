@@ -1,10 +1,10 @@
 package engine
 
 import (
-	"amumax/cuda"
-	"amumax/data"
-	"amumax/script"
-	"amumax/util"
+	"github.com/MathieuMoalic/amumax/cuda"
+	"github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/script"
+	"github.com/MathieuMoalic/amumax/util"
 	"math"
 	"reflect"
 )

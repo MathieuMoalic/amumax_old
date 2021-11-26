@@ -1,8 +1,8 @@
 package draw
 
 import (
-	"amumax/data"
-	"amumax/util"
+	"github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/util"
 	"image"
 	"image/color"
 	"log"

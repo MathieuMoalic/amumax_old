@@ -8,14 +8,14 @@ import (
 	"sort"
 	"strings"
 
-	"amumax/cuda"
-	"amumax/data"
-	"amumax/dump"
-	"amumax/httpfs"
-	"amumax/mag"
-	"amumax/oommf"
-	"amumax/util"
-	"amumax/zarr"
+	"github.com/MathieuMoalic/amumax/cuda"
+	"github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/dump"
+	"github.com/MathieuMoalic/amumax/httpfs"
+	"github.com/MathieuMoalic/amumax/mag"
+	"github.com/MathieuMoalic/amumax/oommf"
+	"github.com/MathieuMoalic/amumax/util"
+	"github.com/MathieuMoalic/amumax/zarr"
 )
 
 func init() {

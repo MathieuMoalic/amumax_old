@@ -2,7 +2,7 @@ package cufft
 
 import (
 	"fmt"
-	"amumax/cuda/cu"
+	"github.com/MathieuMoalic/amumax/cuda/cu"
 )
 
 // needed for all other tests.

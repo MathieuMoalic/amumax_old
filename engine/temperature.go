@@ -1,11 +1,11 @@
 package engine
 
 import (
-	"amumax/cuda"
-	"amumax/cuda/curand"
-	"amumax/data"
-	"amumax/mag"
-	//"amumax/util"
+	"github.com/MathieuMoalic/amumax/cuda"
+	"github.com/MathieuMoalic/amumax/cuda/curand"
+	"github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/mag"
+	//"github.com/MathieuMoalic/amumax/util"
 	"math"
 )
 

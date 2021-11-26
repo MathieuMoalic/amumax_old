@@ -5,9 +5,9 @@ package engine
 import (
 	"fmt"
 
-	"amumax/cuda"
-	"amumax/data"
-	"amumax/util"
+	"github.com/MathieuMoalic/amumax/cuda"
+	"github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/util"
 )
 
 var (

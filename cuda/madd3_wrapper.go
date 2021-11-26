@@ -6,8 +6,8 @@ package cuda
 */
 
 import (
-	"amumax/cuda/cu"
-	"amumax/timer"
+	"github.com/MathieuMoalic/amumax/cuda/cu"
+	"github.com/MathieuMoalic/amumax/timer"
 	"sync"
 	"unsafe"
 )

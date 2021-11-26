@@ -2,7 +2,7 @@ package engine
 
 // Effective field
 
-import "amumax/data"
+import "github.com/MathieuMoalic/amumax/data"
 
 var B_eff = NewVectorField("B_eff", "T", "Effective field", SetEffectiveField)
 

@@ -1,7 +1,7 @@
 package cuda
 
 import (
-	"amumax/data"
+	"github.com/MathieuMoalic/amumax/data"
 )
 
 // Add Slonczewski ST torque to torque (Tesla).
