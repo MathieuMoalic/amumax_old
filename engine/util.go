@@ -15,6 +15,7 @@ import (
 	"github.com/mumax/3/mag"
 	"github.com/mumax/3/oommf"
 	"github.com/mumax/3/util"
+	"github.com/mumax/3/zarr"
 )
 
 func init() {
@@ -26,6 +27,7 @@ func init() {
 	DeclConst("Mu0", mag.Mu0, "Permittivity of vaccum (Tm/A)")
 	DeclFunc("Print", myprint, "Print to standard output")
 	DeclFunc("LoadFile", LoadFile, "Load a data file (ovf or dump)")
+	DeclFunc("ZarrLoadFile", ZarrLoadFile, "Load a zarr data file")
 	DeclFunc("Index2Coord", Index2Coord, "Convert cell index to x,y,z coordinate in meter")
 	DeclFunc("NewSlice", NewSlice, "Makes a 4D array with a specified number of components (first argument) "+
 		"and a specified size nx,ny,nz (remaining arguments)")
@@ -79,7 +81,14 @@ func Fprintln(filename string, msg ...interface{}) {
 	err := httpfs.Append(filename, []byte(fmt.Sprintln(myFmt(msg)...)))
 	util.FatalErr(err)
 }
-
+func ZarrLoadFile(fname string) *data.Slice {
+	// in, err := httpfs.Open(fname)
+	// util.FatalErr(err)
+	var s *data.Slice
+	s,_ = zarr.Read(fname)
+	// util.FatalErr(err)
+	return s
+}
 // Read a magnetization state from .dump file.
 func LoadFile(fname string) *data.Slice {
 	in, err := httpfs.Open(fname)

@@ -26,7 +26,6 @@ func InitIO(inputfile, od string, force bool) {
 	if outputdir != "" {
 		panic("output directory already set")
 	}
-
 	InputFile = inputfile
 	if !strings.HasSuffix(od, "/") {
 		od += "/"
@@ -36,12 +35,13 @@ func InitIO(inputfile, od string, force bool) {
 		httpfs.SetWD(outputdir + "/../")
 	}
 	LogOut("output directory:", outputdir)
-
+	
 	if force {
 		httpfs.Remove(od)
 	}
-
+	
 	_ = httpfs.Mkdir(od)
-
+	
 	initLog()
+	InitZgroup()
 }

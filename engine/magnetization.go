@@ -54,6 +54,9 @@ func (m *magnetization) Set(c Config) {
 func (m *magnetization) LoadFile(fname string) {
 	m.SetArray(LoadFile(fname))
 }
+func (m *magnetization) ZarrLoadFile(fname string) {
+	m.SetArray(ZarrLoadFile(fname))
+}
 
 func (m *magnetization) Slice() (s *data.Slice, recycle bool) {
 	return m.Buffer(), false

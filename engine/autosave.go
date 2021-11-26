@@ -22,6 +22,12 @@ func DoOutput() {
 			a.count++
 		}
 	}
+	for q, a := range zarr_output {
+		if a.needSave() {
+			a.save(q,a.name)
+			a.count++
+		}
+	}
 	if Table.needSave() {
 		Table.Save()
 	}
