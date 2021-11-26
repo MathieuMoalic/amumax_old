@@ -3,8 +3,8 @@ package cuda
 // Generation of Magnetic Force Microscopy images.
 
 import (
-	"github.com/mumax/3/data"
-	"github.com/mumax/3/mag"
+	"amumax/data"
+	"amumax/mag"
 )
 
 // Stores the necessary state to perform FFT-accelerated convolution

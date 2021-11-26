@@ -4,9 +4,9 @@ package engine
 
 import (
 	"fmt"
-	"github.com/mumax/3/cuda"
-	"github.com/mumax/3/data"
-	"github.com/mumax/3/util"
+	"amumax/cuda"
+	"amumax/data"
+	"amumax/util"
 )
 
 type component struct {

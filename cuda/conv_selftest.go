@@ -5,8 +5,8 @@ package cuda
 import (
 	"math/rand"
 
-	"github.com/mumax/3/data"
-	"github.com/mumax/3/util"
+	"amumax/data"
+	"amumax/util"
 )
 
 // Compares FFT-accelerated convolution against brute-force on sparse data.

@@ -3,11 +3,11 @@ package cuda
 import (
 	"log"
 
-	"github.com/mumax/3/cuda/cu"
-	"github.com/mumax/3/cuda/cufft"
-	"github.com/mumax/3/data"
-	"github.com/mumax/3/timer"
-	"github.com/mumax/3/util"
+	"amumax/cuda/cu"
+	"amumax/cuda/cufft"
+	"amumax/data"
+	"amumax/timer"
+	"amumax/util"
 )
 
 // 3D single-precission real-to-complex FFT plan.

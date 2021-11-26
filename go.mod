@@ -1,4 +1,4 @@
-module github.com/mumax/3
+module AMUmax
 
 go 1.16
 

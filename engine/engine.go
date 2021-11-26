@@ -18,9 +18,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mumax/3/cuda/cu"
-	"github.com/mumax/3/timer"
-	"github.com/mumax/3/zarr"
+	"amumax/cuda/cu"
+	"amumax/timer"
+	"amumax/zarr"
 )
 
 const VERSION = "mumax 3.10"

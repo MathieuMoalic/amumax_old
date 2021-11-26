@@ -5,7 +5,7 @@ import (
 	"testing"
 	"unsafe"
 
-	"github.com/mumax/3/cuda/cu"
+	"amumax/cuda/cu"
 )
 
 func TestExampleFFT1D(t *testing.T) {

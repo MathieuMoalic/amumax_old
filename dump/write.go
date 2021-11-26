@@ -2,8 +2,8 @@ package dump
 
 import (
 	"bufio"
-	"github.com/mumax/3/data"
-	"github.com/mumax/3/util"
+	"amumax/data"
+	"amumax/util"
 	"hash"
 	"hash/crc64"
 	"io"

@@ -12,8 +12,8 @@ import (
 	"text/template"
 	"unicode"
 
-	"github.com/mumax/3/cuda"
-	"github.com/mumax/3/engine"
+	"amumax/cuda"
+	"amumax/engine"
 )
 
 var (

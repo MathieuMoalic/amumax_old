@@ -3,7 +3,7 @@ package cuda
 import (
 	"unsafe"
 
-	"github.com/mumax/3/data"
+	"amumax/data"
 )
 
 // Sets vector dst to zero where mask != 0.

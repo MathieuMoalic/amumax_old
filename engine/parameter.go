@@ -11,10 +11,10 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/mumax/3/cuda"
-	"github.com/mumax/3/data"
-	"github.com/mumax/3/script"
-	"github.com/mumax/3/util"
+	"amumax/cuda"
+	"amumax/data"
+	"amumax/script"
+	"amumax/util"
 )
 
 // input parameter, settable by user

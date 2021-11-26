@@ -6,8 +6,8 @@ import (
 	"log"
 	"unsafe"
 
-	"github.com/mumax/3/cuda/cu"
-	"github.com/mumax/3/util"
+	"amumax/cuda/cu"
+	"amumax/util"
 )
 
 // 3D byte slice, used for region lookup.

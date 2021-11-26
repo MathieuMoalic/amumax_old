@@ -1,8 +1,8 @@
 package cuda
 
 import (
-	"github.com/mumax/3/data"
-	"github.com/mumax/3/util"
+	"amumax/data"
+	"amumax/util"
 )
 
 // Normalize vec to unit length, unless length or vol are zero.

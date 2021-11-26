@@ -1,7 +1,7 @@
 package data
 
 import (
-	"github.com/mumax/3/util"
+	"amumax/util"
 )
 
 // Resample returns a slice of new size N,

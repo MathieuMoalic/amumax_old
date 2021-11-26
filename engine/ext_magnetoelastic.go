@@ -3,9 +3,9 @@ package engine
 // Mangeto-elastic coupling.
 
 import (
-	"github.com/mumax/3/cuda"
-	"github.com/mumax/3/data"
-	"github.com/mumax/3/util"
+	"amumax/cuda"
+	"amumax/data"
+	"amumax/util"
 )
 
 var (

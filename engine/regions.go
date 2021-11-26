@@ -1,9 +1,9 @@
 package engine
 
 import (
-	"github.com/mumax/3/cuda"
-	"github.com/mumax/3/data"
-	"github.com/mumax/3/util"
+	"amumax/cuda"
+	"amumax/data"
+	"amumax/util"
 )
 
 var regions = Regions{info: info{1, "regions", ""}} // global regions map

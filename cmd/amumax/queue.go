@@ -5,8 +5,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/mumax/3/cuda/cu"
-	"github.com/mumax/3/engine"
+	"amumax/cuda/cu"
+	"amumax/engine"
 	"io"
 	"log"
 	"net/http"

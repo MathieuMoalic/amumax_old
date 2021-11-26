@@ -3,9 +3,9 @@ package zarr
 import (
 	"fmt"
 	"encoding/json"
-	"github.com/mumax/3/util"
-	"github.com/mumax/3/httpfs"
-	"github.com/mumax/3/data"
+	"amumax/util"
+	"amumax/httpfs"
+	"amumax/data"
 	"time"
 )
 

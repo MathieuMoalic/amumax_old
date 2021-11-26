@@ -2,9 +2,9 @@ package engine
 
 import (
 	"fmt"
-	"github.com/mumax/3/data"
-	"github.com/mumax/3/mag"
-	"github.com/mumax/3/util"
+	"amumax/data"
+	"amumax/mag"
+	"amumax/util"
 	"math"
 )
 

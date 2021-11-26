@@ -8,14 +8,14 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/mumax/3/cuda"
-	"github.com/mumax/3/data"
-	"github.com/mumax/3/dump"
-	"github.com/mumax/3/httpfs"
-	"github.com/mumax/3/mag"
-	"github.com/mumax/3/oommf"
-	"github.com/mumax/3/util"
-	"github.com/mumax/3/zarr"
+	"amumax/cuda"
+	"amumax/data"
+	"amumax/dump"
+	"amumax/httpfs"
+	"amumax/mag"
+	"amumax/oommf"
+	"amumax/util"
+	"amumax/zarr"
 )
 
 func init() {

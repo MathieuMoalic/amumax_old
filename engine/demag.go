@@ -3,9 +3,9 @@ package engine
 // Calculation of magnetostatic field
 
 import (
-	"github.com/mumax/3/cuda"
-	"github.com/mumax/3/data"
-	"github.com/mumax/3/mag"
+	"amumax/cuda"
+	"amumax/data"
+	"amumax/mag"
 )
 
 // Demag variables

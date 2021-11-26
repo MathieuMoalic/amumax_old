@@ -1,9 +1,9 @@
 package cuda
 
 import (
-	"github.com/mumax/3/cuda/cu"
-	"github.com/mumax/3/data"
-	"github.com/mumax/3/util"
+	"amumax/cuda/cu"
+	"amumax/data"
+	"amumax/util"
 )
 
 // Stores the necessary state to perform FFT-accelerated convolution

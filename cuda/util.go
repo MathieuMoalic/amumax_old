@@ -2,7 +2,7 @@ package cuda
 
 import (
 	"fmt"
-	"github.com/mumax/3/cuda/cu"
+	"amumax/cuda/cu"
 )
 
 // CUDA Launch parameters.

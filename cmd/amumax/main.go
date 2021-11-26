@@ -10,10 +10,10 @@ import (
 	"path"
 	"time"
 
-	"github.com/mumax/3/cuda"
-	"github.com/mumax/3/engine"
-	"github.com/mumax/3/script"
-	"github.com/mumax/3/util"
+	"amumax/cuda"
+	"amumax/engine"
+	"amumax/script"
+	"amumax/util"
 )
 
 var (

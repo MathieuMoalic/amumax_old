@@ -1,7 +1,7 @@
 package engine
 
 import (
-	"github.com/mumax/3/data"
+	"amumax/data"
 	"math"
 )
 

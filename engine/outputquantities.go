@@ -10,8 +10,8 @@ in objects that provide:
 
 import (
 	"fmt"
-	"github.com/mumax/3/cuda"
-	"github.com/mumax/3/data"
+	"amumax/cuda"
+	"amumax/data"
 )
 
 // The Info interface defines the bare minimum methods a quantity must implement

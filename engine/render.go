@@ -1,9 +1,9 @@
 package engine
 
 import (
-	"github.com/mumax/3/cuda"
-	"github.com/mumax/3/data"
-	"github.com/mumax/3/draw"
+	"amumax/cuda"
+	"amumax/data"
+	"amumax/draw"
 	"image"
 	"image/jpeg"
 	"math"

@@ -1,7 +1,7 @@
 package cuda
 
 import (
-	"github.com/mumax/3/cuda/cu"
+	"amumax/cuda/cu"
 )
 
 // needed for all other tests.

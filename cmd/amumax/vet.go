@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/mumax/3/engine"
-	"github.com/mumax/3/util"
+	"amumax/engine"
+	"amumax/util"
 )
 
 // check all input files for errors, don't run.

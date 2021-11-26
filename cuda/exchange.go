@@ -3,7 +3,7 @@ package cuda
 import (
 	"unsafe"
 
-	"github.com/mumax/3/data"
+	"amumax/data"
 )
 
 // Add exchange field to Beff.
