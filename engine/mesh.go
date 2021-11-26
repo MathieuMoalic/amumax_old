@@ -79,6 +79,8 @@ func SetMesh(Nx, Ny, Nz int, cellSizeX, cellSizeY, cellSizeZ float64, pbcx, pbcy
 	lazy_gridsize = []int{Nx, Ny, Nz}
 	lazy_cellsize = []float64{cellSizeX, cellSizeY, cellSizeZ}
 	lazy_pbc = []int{pbcx, pbcy, pbcz}
+
+	zmeta.StartSave(OD() + "/.zattrs",globalmesh_) // we save once at the beginning
 }
 
 func printf(f float64) float32 {

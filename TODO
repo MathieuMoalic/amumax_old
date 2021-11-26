@@ -1,6 +1,1 @@
-add meta arguments
 add table to zarr array
-add start time, end time, total time
-add zarr file loading
-
-add .attrs and .zgroup for single save

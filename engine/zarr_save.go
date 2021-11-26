@@ -31,18 +31,6 @@ var zarray_template = `{
     "shape": [%d,%d,%d,%d,%d],
     "zarr_format": 2
 }`
-var zattrs_template = `{
-    "dx": %e,
-    "dy": %e,
-    "dz": %e,
-    "Nx": %d,
-    "Ny": %d,
-    "Nz": %d,
-    "Tx": %e,
-    "Ty": %e,
-    "Tz": %e,
-    "PBC": [%d,%d,%d]
-}`
 var zarr_autonum = make(map[string]int) 
 var zarr_output  = make(map[Quantity]*zarr_autosave) // when to save quantities
 
@@ -74,7 +62,6 @@ func ZarrAutoSave(q Quantity, period float64) {
 }
 
 func ZarrAutoSaveAs(q Quantity, fname string, period float64) {
-	SaveAttrs(q)
 	if period == 0 {
 		delete(zarr_output, q)
 		} else {
@@ -93,31 +80,6 @@ func ZarrSaveAs(q Quantity, fname string){
 	zarr_autonum[fname]++
 }
 
-func SaveAttrs(q Quantity) {
-	// metadata stored in .zattrs
-	zattrs, err := httpfs.Create(OD() +"/.zattrs")
-	util.FatalErr(err)
-	defer zattrs.Close()
-	cellsize := MeshOf(q).CellSize()
-	gridSize := MeshOf(q).Size()
-	pbc := MeshOf(q).PBC()
-	metadata := fmt.Sprintf(zattrs_template,
-		cellsize[X],
-		cellsize[Y],
-		cellsize[Z],
-		gridSize[X],
-		gridSize[Y],
-		gridSize[Z],
-		cellsize[X] * float64(gridSize[X]),
-		cellsize[Y] * float64(gridSize[Y]),
-		cellsize[Z] * float64(gridSize[Z]),
-		pbc[0],
-		pbc[1],
-		pbc[2],
-	)
-	zattrs.Write([]byte(metadata))
-
-}
 // Save once, with auto file name
 func ZarrSave(q Quantity) {
 	ZarrSaveAs(q,NameOf(q))

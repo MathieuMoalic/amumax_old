@@ -1,18 +1,16 @@
 package zarr
 
 import (
-	// "bufio"
 	"encoding/binary"
-    // "fmt"
     "math"
-	"github.com/mumax/3/data"
-	// "github.com/mumax/3/util"
-	"github.com/mumax/3/httpfs"
 	"io/ioutil"
 	"path"
 	"encoding/json"
+	
+	"github.com/mumax/3/data"
+	"github.com/mumax/3/httpfs"
+	
 	"github.com/DataDog/zstd" 
-	// "reflect"
 )
 
 func Float32frombytes(bytes []byte) float32 {
@@ -38,11 +36,6 @@ func Read(fname string) (s *data.Slice, err error) {
 	var zarray Zarray
 	json.Unmarshal([]byte(content), &zarray)
 
-	// fmt.Println("+++++++++++++++++++++++++++++++++++++++++++")
-	// fmt.Println(zarray)
-	// fmt.Println(zarray.Chunks)
-	// fmt.Println(zarray.Chunks[3])
-	// fmt.Println("+++++++++++++++++++++++++++++++++++++++++++")
 	sizez := zarray.Chunks[1]
 	sizey := zarray.Chunks[2]
 	sizex := zarray.Chunks[3]

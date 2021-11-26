@@ -20,6 +20,7 @@ import (
 
 	"github.com/mumax/3/cuda/cu"
 	"github.com/mumax/3/timer"
+	"github.com/mumax/3/zarr"
 )
 
 const VERSION = "mumax 3.10"
@@ -34,6 +35,7 @@ var (
 	busyLock sync.Mutex
 	busy     bool // are we so busy we can't respond from run loop? (e.g. calc kernel)
 )
+var zmeta = new(zarr.Zmeta)
 
 // We set SetBusy(true) when the simulation is too busy too accept GUI input on Inject channel.
 // E.g. during kernel init.
@@ -60,5 +62,5 @@ func Close() {
 	if *Flag_sync {
 		timer.Print(os.Stdout)
 	}
-
+	zmeta.EndSave(OD() + "/.zattrs", StartTime) // save once at the end too
 }
