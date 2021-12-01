@@ -48,6 +48,12 @@ func (t *DataTable) Write(p []byte) (int, error) {
 	return n, err
 }
 
+func (t *DataTable) flush() {
+	t.flushlock.Lock()
+	defer t.flushlock.Unlock()
+	t.Flush()
+}
+
 func (t *DataTable) Flush() error {
 	if t.output == nil {
 		return nil
@@ -64,48 +70,6 @@ func (t *DataTable) Flush() error {
 	return err
 }
 
-func newTable(name string) *DataTable {
-	t := new(DataTable)
-	t.name = name
-	return t
-}
-
-func TableAdd(col Quantity) {
-	Table.Add(col)
-}
-
-func TableAddVariable(x script.ScalarFunction, name, unit string) {
-	Table.AddVariable(x, name, unit)
-}
-
-func (t *DataTable) AddVariable(x script.ScalarFunction, name, unit string) {
-	TableAdd(&userVar{x, name, unit})
-}
-
-type userVar struct {
-	value      script.ScalarFunction
-	name, unit string
-}
-
-func (x *userVar) Name() string       { return x.name }
-func (x *userVar) NComp() int         { return 1 }
-func (x *userVar) Unit() string       { return x.unit }
-func (x *userVar) average() []float64 { return []float64{x.value.Float()} }
-func (x *userVar) EvalTo(dst *data.Slice) {
-	avg := x.average()
-	for c := 0; c < x.NComp(); c++ {
-		cuda.Memset(dst.Comp(c), float32(avg[c]))
-	}
-}
-
-func TableSave() {
-	Table.Save()
-}
-
-func TableAutoSave(period float64) {
-	Table.autosave = autosave{period, Time, -1, nil} // count -1 allows output on t=0
-}
-
 func (t *DataTable) Add(output Quantity) {
 	if t.inited() {
 		util.Fatal("data table add ", NameOf(output), ": need to add quantity before table is output the first time")
@@ -113,21 +77,37 @@ func (t *DataTable) Add(output Quantity) {
 	t.outputs = append(t.outputs, output)
 }
 
-type ColumnHeader struct {
-	name string
-	unit string
+func (t *DataTable) init() {
+	if t.inited() {
+		return
+	}
+	f, err := httpfs.Create(OD() + t.name + ".txt")
+	util.FatalErr(err)
+	t.output = f
+	// for zarr :
+
+	// write header
+	header := t.Header()
+	fprint(t, "# ", header[0])
+	for col := 1; col < len(header); col++ {
+		fprint(t, "\t", header[col])
+	}
+	fprintln(t)
+	t.Flush()
+
+	// periodically flush so GUI shows graph,
+	// but don't flush after every output for performance
+	// (httpfs flush is expensive)
+	go func() {
+		for {
+			time.Sleep(TableAutoflushRate * time.Second)
+			Table.flush()
+		}
+	}()
 }
 
-func (c ColumnHeader) String() string {
-	return c.name + " (" + c.unit + ")"
-}
-
-func (c ColumnHeader) Name() string {
-	return c.name
-}
-
-func (c ColumnHeader) Unit() string {
-	return c.unit
+func (t *DataTable) inited() bool {
+	return t.output != nil
 }
 
 func (t *DataTable) Header() (headers []ColumnHeader) {
@@ -138,7 +118,7 @@ func (t *DataTable) Header() (headers []ColumnHeader) {
 			headers = append(headers, ColumnHeader{NameOf(o), UnitOf(o)})
 		} else {
 			for c := 0; c < o.NComp(); c++ {
-				name := NameOf(o) + string('x'+c)
+				name := NameOf(o) + string(rune('x'+c))
 				headers = append(headers, ColumnHeader{name, UnitOf(o)})
 			}
 		}
@@ -200,7 +180,7 @@ func (t *DataTable) Read() (data [][]float64, err error) {
 		}
 
 		record := make([]float64, nCols)
-		for c, _ := range record {
+		for c := range record {
 			record[c], err = strconv.ParseFloat(strings.TrimSpace(line[c]), 64)
 			if err != nil {
 				return nil, err
@@ -218,47 +198,67 @@ func (t *DataTable) Println(msg ...interface{}) {
 	fprintln(t, msg...)
 }
 
+func (t *DataTable) AddVariable(x script.ScalarFunction, name, unit string) {
+	TableAdd(&userVar{x, name, unit})
+}
+
+type ColumnHeader struct {
+	name string
+	unit string
+}
+
+func (c ColumnHeader) String() string {
+	return c.name + " (" + c.unit + ")"
+}
+
+func (c ColumnHeader) Name() string {
+	return c.name
+}
+
+func (c ColumnHeader) Unit() string {
+	return c.unit
+}
+
+type userVar struct {
+	value      script.ScalarFunction
+	name, unit string
+}
+
+func (x *userVar) Name() string       { return x.name }
+func (x *userVar) NComp() int         { return 1 }
+func (x *userVar) Unit() string       { return x.unit }
+func (x *userVar) average() []float64 { return []float64{x.value.Float()} }
+func (x *userVar) EvalTo(dst *data.Slice) {
+	avg := x.average()
+	for c := 0; c < x.NComp(); c++ {
+		cuda.Memset(dst.Comp(c), float32(avg[c]))
+	}
+}
+
+func newTable(name string) *DataTable {
+	t := new(DataTable)
+	t.name = name
+	return t
+}
+
+func TableAdd(col Quantity) {
+	Table.Add(col)
+}
+
+func TableAddVariable(x script.ScalarFunction, name, unit string) {
+	Table.AddVariable(x, name, unit)
+}
+
+func TableSave() {
+	Table.Save()
+}
+
+func TableAutoSave(period float64) {
+	Table.autosave = autosave{period, Time, -1, nil} // count -1 allows output on t=0
+}
+
 func TablePrint(msg ...interface{}) {
 	Table.Println(msg...)
-}
-
-// open writer and write header
-func (t *DataTable) init() {
-	if t.inited() {
-		return
-	}
-	f, err := httpfs.Create(OD() + t.name + ".txt")
-	util.FatalErr(err)
-	t.output = f
-
-	// write header
-	header := t.Header()
-	fprint(t, "# ", header[0])
-	for col := 1; col < len(header); col++ {
-		fprint(t, "\t", header[col])
-	}
-	fprintln(t)
-	t.Flush()
-
-	// periodically flush so GUI shows graph,
-	// but don't flush after every output for performance
-	// (httpfs flush is expensive)
-	go func() {
-		for {
-			time.Sleep(TableAutoflushRate * time.Second)
-			Table.flush()
-		}
-	}()
-}
-
-func (t *DataTable) inited() bool {
-	return t.output != nil
-}
-
-func (t *DataTable) flush() {
-	t.flushlock.Lock()
-	defer t.flushlock.Unlock()
-	t.Flush()
 }
 
 // Safe fmt.Fprint, will fail on error
@@ -271,5 +271,4 @@ func fprint(out io.Writer, x ...interface{}) {
 func fprintln(out io.Writer, x ...interface{}) {
 	_, err := fmt.Fprintln(out, x...)
 	util.FatalErr(err)
-
 }
