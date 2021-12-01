@@ -3,6 +3,7 @@ package engine
 import (
 	"github.com/MathieuMoalic/amumax/cuda"
 	"github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/zarr"
 )
 
 var globalmesh_ data.Mesh // mesh for m and everything that has the same size
@@ -80,7 +81,7 @@ func SetMesh(Nx, Ny, Nz int, cellSizeX, cellSizeY, cellSizeZ float64, pbcx, pbcy
 	lazy_cellsize = []float64{cellSizeX, cellSizeY, cellSizeZ}
 	lazy_pbc = []int{pbcx, pbcy, pbcz}
 
-	zmeta.StartSave(OD() + "/.zattrs",globalmesh_) // we save once at the beginning
+	zarr.SaveMetaStart(OD()+"/.zattrs", globalmesh_, StartTime)
 }
 
 func printf(f float64) float32 {

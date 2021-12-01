@@ -2,62 +2,47 @@ package zarr
 
 import (
 	"fmt"
-	"encoding/json"
-	"github.com/MathieuMoalic/amumax/util"
-	"github.com/MathieuMoalic/amumax/httpfs"
-	"github.com/MathieuMoalic/amumax/data"
 	"time"
+
+	"github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/httpfs"
+	"github.com/MathieuMoalic/amumax/util"
 )
 
-type Zmeta struct {
-	dx		float64
-	dy 		float64
-	dz 		float64
-	Nx  	int
-	Ny    	int
-	Nz      int
-	Tx      float64
-	Ty 		float64
-	Tz 		float64
-	PBC 	[3]int
-	Start_time string
-	End_time string
-	Total_time string
+func SaveMetaStart(fname string, m data.Mesh, start_time time.Time) {
+	SaveMeta(fname, m, start_time.Format(time.UnixDate), "", "")
+}
+func SaveMetaEnd(fname string, m data.Mesh, start_time time.Time) {
+	SaveMeta(fname, m, start_time.Format(time.UnixDate), time.Now().Format(time.UnixDate), fmt.Sprintf("%s", time.Now().Sub(start_time)))
 }
 
-func (a *Zmeta) Save(fname string) {
+func SaveMeta(fname string, m data.Mesh, start_time string, end_time string, diff_time string) {
+	var zattrs_template = `{
+		"dx": %e,
+		"dy": %e,
+		"dz": %e,
+		"Nx": %d,
+		"Ny": %d,
+		"Nz": %d,
+		"Tx": %e,
+		"Ty": %e,
+		"Tz": %e,
+		"PBC": [
+			%d,
+			%d,
+			%d
+		],
+		"Start_time": "%s",
+		"End_time": "%s",
+		"Total_time": "%s"
+	}`
+	//.zattrs file
 	zattrs, err := httpfs.Create(fname)
 	util.FatalErr(err)
 	defer zattrs.Close()
-	metadata, err := json.Marshal(a)
-	if err != nil {
-		panic(err)
-	}
-	_,err = zattrs.Write([]byte(metadata))
-	util.FatalErr(err)
-}
-
-func (a *Zmeta) EndSave(fname string, start_time time.Time){
-	EndTime := time.Now()
-	a.End_time = EndTime.Format(time.UnixDate)
-	a.Total_time = fmt.Sprintf("%s",EndTime.Sub(start_time))
-	a.Save(fname) // we save once at the end
-}
-
-func (a *Zmeta) StartSave(fname string, m data.Mesh){
 	D := m.CellSize()
 	S := m.Size()
 	P := m.PBC()
-	a.dx = D[0]
-	a.dy = D[1]
-	a.dz = D[2]
-	a.Nx = S[0]
-	a.Ny = S[1]
-	a.Nz = S[2]
-	a.Tx = float64(a.Nx) * a.dx
-	a.Ty = float64(a.Ny) * a.dy
-	a.Tz = float64(a.Nz) * a.dz
-	a.PBC = [3]int{P[0], P[1], P[2]}
-	a.Start_time = time.Now().Format(time.UnixDate)
-	a.Save(fname) // we save once at the end
+	metadata := fmt.Sprintf(zattrs_template, D[0], D[1], D[2], S[0], S[1], S[2], float64(S[0])*D[0], float64(S[1])*D[1], float64(S[2])*D[2], P[0], P[1], P[2], start_time, end_time, diff_time)
+	zattrs.Write([]byte(metadata))
 }

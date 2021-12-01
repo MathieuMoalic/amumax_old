@@ -10,7 +10,7 @@ var (
 )
 
 func init() {
-	DeclFunc("AutoSave", AutoSave, "Auto save space-dependent quantity every period (s).")
+	DeclFunc("OldAutoSave", AutoSave, "Auto save space-dependent quantity every period (s).")
 	DeclFunc("AutoSnapshot", AutoSnapshot, "Auto save image of quantity every period (s).")
 }
 
@@ -24,7 +24,7 @@ func DoOutput() {
 	}
 	for q, a := range zarr_output {
 		if a.needSave() {
-			a.save(q,a.name)
+			a.save(q, a.name)
 			a.count++
 		}
 	}
