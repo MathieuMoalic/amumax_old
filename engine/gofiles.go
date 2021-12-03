@@ -4,10 +4,11 @@ package engine
 
 import (
 	"flag"
-	"github.com/MathieuMoalic/amumax/cuda"
-	"github.com/MathieuMoalic/amumax/util"
 	"os"
 	"path"
+
+	"github.com/MathieuMoalic/amumax/cuda"
+	"github.com/MathieuMoalic/amumax/util"
 )
 
 var (
@@ -41,7 +42,7 @@ func InitAndClose() func() {
 
 	od := *Flag_od
 	if od == "" {
-		od = path.Base(os.Args[0]) + ".out"
+		od = path.Base(os.Args[0]) + ".zarr"
 	}
 	inFile := util.NoExt(od)
 	InitIO(inFile, od, *Flag_forceclean)

@@ -94,7 +94,7 @@ func runFileAndServe(fname string) {
 }
 
 func runScript(fname string) {
-	outDir := util.NoExt(fname) + ".out"
+	outDir := util.NoExt(fname) + ".zarr"
 	if *engine.Flag_od != "" {
 		outDir = *engine.Flag_od
 	}

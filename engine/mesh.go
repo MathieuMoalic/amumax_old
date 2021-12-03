@@ -81,7 +81,7 @@ func SetMesh(Nx, Ny, Nz int, cellSizeX, cellSizeY, cellSizeZ float64, pbcx, pbcy
 	lazy_cellsize = []float64{cellSizeX, cellSizeY, cellSizeZ}
 	lazy_pbc = []int{pbcx, pbcy, pbcz}
 
-	zarr.SaveMetaStart(OD()+"/.zattrs", globalmesh_, StartTime)
+	zarr.SaveMetaStart(OD()+"/.zattrs", globalmesh_, Dt_si, StartTime)
 }
 
 func printf(f float64) float32 {

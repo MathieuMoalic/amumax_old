@@ -61,5 +61,5 @@ func Close() {
 	if *Flag_sync {
 		timer.Print(os.Stdout)
 	}
-	zarr.SaveMetaEnd(OD()+"/.zattrs", globalmesh_, StartTime)
+	zarr.SaveMetaEnd(OD()+"/.zattrs", globalmesh_, Dt_si, StartTime)
 }
