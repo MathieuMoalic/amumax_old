@@ -23,20 +23,16 @@ var Table = *newTable("table") // output handle for tabular data (average magnet
 const TableAutoflushRate = 5   // auto-flush table every X seconds
 
 func init() {
-	DeclFunc("TableAdd", TableAdd, "Add quantity as a column to the data table.")
-	DeclFunc("TableAddVar", TableAddVariable, "Add user-defined variable + name + unit to data table.")
-	DeclFunc("TableSave", TableSave, "Save the data table right now (appends one line).")
-	DeclFunc("TableAutoSave", TableAutoSave, "Auto-save the data table every period (s). Zero disables save.")
-	DeclFunc("TablePrint", TablePrint, "Print anyting in the data table")
+	DeclFunc("OldTableAdd", TableAdd, "Add quantity as a column to the data table.")
+	DeclFunc("OldTableAddVar", TableAddVariable, "Add user-defined variable + name + unit to data table.")
+	DeclFunc("OldTableSave", TableSave, "Save the data table right now (appends one line).")
+	DeclFunc("OldTableAutoSave", TableAutoSave, "Auto-save the data table every period (s). Zero disables save.")
+	DeclFunc("OldTablePrint", TablePrint, "Print anyting in the data table")
 	Table.Add(&M)
 }
 
 type DataTable struct {
 	output interface {
-		io.Writer
-		Flush() error
-	}
-	output2 interface {
 		io.Writer
 		Flush() error
 	}
@@ -89,9 +85,6 @@ func (t *DataTable) init() {
 	util.FatalErr(err)
 	t.output = f
 	// for zarr :
-	f2, err := httpfs.Create(OD() + "zarr_table")
-	util.FatalErr(err)
-	t.output2 = f2
 
 	// write header
 	header := t.Header()

@@ -21,16 +21,6 @@ func init() {
 	DeclFunc("Save", ZarrSave, "Save space-dependent quantity as the zarr standard.")
 }
 
-var zarray_template = `{
-    "chunks": [1,%d,%d,%d,%d],
-    "compressor": {"id": "zstd","level": 1},
-    "dtype": "<f4",
-    "fill_value": 0.0,
-    "filters": null,
-    "order": "C",
-    "shape": [%d,%d,%d,%d,%d],
-    "zarr_format": 2
-}`
 var zarr_autonum = make(map[string]int)
 var zarr_output = make(map[Quantity]*zarr_autosave) // when to save quantities
 
@@ -85,6 +75,24 @@ func ZarrSave(q Quantity) {
 	ZarrSaveAs(q, NameOf(q))
 }
 
+func ZarrSaveZarray(path string, size [3]int, ncomp int, time int) {
+	var zarray_template = `{
+	"chunks": [1,%d,%d,%d,%d],
+	"compressor": {"id": "zstd","level": 1},
+	"dtype": "<f4",
+	"fill_value": 0.0,
+	"filters": null,
+	"order": "C",
+	"shape": [%d,%d,%d,%d,%d],
+	"zarr_format": 2
+}`
+	fzarray, err := httpfs.Create(path)
+	util.FatalErr(err)
+	defer fzarray.Close()
+	metadata := fmt.Sprintf(zarray_template, size[Z], size[Y], size[X], ncomp, time+1, size[Z], size[Y], size[X], ncomp)
+	fzarray.Write([]byte(metadata))
+}
+
 // synchronous save
 func ZarrSyncSave(array *data.Slice, qname string, time int) {
 	f, err := httpfs.Create(fmt.Sprintf(OD()+"%s/%d.0.0.0.0", qname, time))
@@ -116,9 +124,5 @@ func ZarrSyncSave(array *data.Slice, qname string, time int) {
 	f.Write(compressedData)
 
 	//.zarray file
-	fzarray, err := httpfs.Create(fmt.Sprintf(OD()+"%s/.zarray", qname))
-	util.FatalErr(err)
-	defer fzarray.Close()
-	metadata := fmt.Sprintf(zarray_template, size[Z], size[Y], size[X], ncomp, time+1, size[Z], size[Y], size[X], ncomp)
-	fzarray.Write([]byte(metadata))
+	ZarrSaveZarray(fmt.Sprintf(OD()+"%s/.zarray", qname), size, ncomp, time)
 }
