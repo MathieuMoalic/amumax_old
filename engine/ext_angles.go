@@ -5,11 +5,6 @@ import (
 	"github.com/MathieuMoalic/amumax/data"
 )
 
-var (
-	ext_phi   = NewScalarField("ext_phi", "rad", "Azimuthal angle", SetPhi)
-	ext_theta = NewScalarField("ext_theta", "rad", "Polar angle", SetTheta)
-)
-
 func SetPhi(dst *data.Slice) {
 	cuda.SetPhi(dst, M.Buffer())
 }

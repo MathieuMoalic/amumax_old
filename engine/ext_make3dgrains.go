@@ -83,8 +83,6 @@ func (t *tesselation3d) makeRandomCenters() {
 		randRegion := t.startRegion + t.rnd.Intn(t.maxRegion)
 		t.centers[p].region = byte(randRegion)
 	}
-
-	return
 }
 
 // Creates a slice of all cells which fall in the shape specified in the constructor.

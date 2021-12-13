@@ -85,10 +85,11 @@ func ZarrLoadFile(fname string) *data.Slice {
 	// in, err := httpfs.Open(fname)
 	// util.FatalErr(err)
 	var s *data.Slice
-	s,_ = zarr.Read(fname)
+	s, _ = zarr.Read(fname)
 	// util.FatalErr(err)
 	return s
 }
+
 // Read a magnetization state from .dump file.
 func LoadFile(fname string) *data.Slice {
 	in, err := httpfs.Open(fname)
@@ -156,23 +157,6 @@ func sign(x float64) float64 {
 		return -1
 	default:
 		return 0
-	}
-}
-
-// returns a/b, or 0 when b == 0
-func safediv(a, b float32) float32 {
-	if b == 0 {
-		return 0
-	} else {
-		return a / b
-	}
-}
-
-// dst = a/b, unless b == 0
-func paramDiv(dst, a, b [][NREGION]float32) {
-	util.Assert(len(dst) == 1 && len(a) == 1 && len(b) == 1)
-	for i := 0; i < NREGION; i++ { // not regions.maxreg
-		dst[0][i] = safediv(a[0][i], b[0][i])
 	}
 }
 

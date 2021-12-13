@@ -1,10 +1,11 @@
 package engine
 
 import (
+	"time"
+
 	"github.com/MathieuMoalic/amumax/cuda"
 	"github.com/MathieuMoalic/amumax/timer"
 	"github.com/MathieuMoalic/amumax/util"
-	"time"
 )
 
 // Asynchronous I/O queue flushes data to disk while simulation keeps running.
@@ -14,8 +15,6 @@ var (
 	saveQue chan func() // passes save requests to runSaver for asyc IO
 	queLen  util.Atom   // # tasks in queue
 )
-
-const maxOutputQueLen = 16 // number of outputs that can be queued for asynchronous I/O.
 
 func init() {
 	DeclFunc("Flush", drainOutput, "Flush all pending output to disk.")

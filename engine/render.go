@@ -1,14 +1,15 @@
 package engine
 
 import (
-	"github.com/MathieuMoalic/amumax/cuda"
-	"github.com/MathieuMoalic/amumax/data"
-	"github.com/MathieuMoalic/amumax/draw"
 	"image"
 	"image/jpeg"
 	"math"
 	"net/http"
 	"sync"
+
+	"github.com/MathieuMoalic/amumax/cuda"
+	"github.com/MathieuMoalic/amumax/data"
+	"github.com/MathieuMoalic/amumax/draw"
 )
 
 type render struct {
@@ -16,7 +17,6 @@ type render struct {
 	quant        Quantity
 	comp         string
 	layer, scale int
-	saveCount    int         // previous max slider value of time
 	rescaleBuf   *data.Slice // GPU
 	imgBuf       *data.Slice // CPU
 	img_         *image.RGBA

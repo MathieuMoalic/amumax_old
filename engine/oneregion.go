@@ -7,14 +7,6 @@ import (
 	"github.com/MathieuMoalic/amumax/util"
 )
 
-func sInRegion(q Quantity, r int) ScalarField {
-	return AsScalarField(inRegion(q, r))
-}
-
-func vInRegion(q Quantity, r int) VectorField {
-	return AsVectorField(inRegion(q, r))
-}
-
 func sOneRegion(q Quantity, r int) *sOneReg {
 	util.Argument(q.NComp() == 1)
 	return &sOneReg{oneReg{q, r}}

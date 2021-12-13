@@ -100,7 +100,7 @@ func (p *TablePlot) update() {
 // Returns a png image plot of table data
 func CreatePlot(table *DataTable, xcol, ycol int) (img []byte, err error) {
 	if table == nil {
-		err = errors.New("DataTable pointer is nil")
+		err = errors.New("dataTable pointer is nil")
 		return
 	}
 
@@ -112,7 +112,7 @@ func CreatePlot(table *DataTable, xcol, ycol int) (img []byte, err error) {
 	header := table.Header()
 
 	if !(xcol >= 0 && xcol < len(header) && ycol >= 0 && ycol < len(header)) {
-		err = errors.New("Invalid column index")
+		err = errors.New("invalid column index")
 		return
 	}
 

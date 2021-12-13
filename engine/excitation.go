@@ -1,12 +1,13 @@
 package engine
 
 import (
+	"math"
+	"reflect"
+
 	"github.com/MathieuMoalic/amumax/cuda"
 	"github.com/MathieuMoalic/amumax/data"
 	"github.com/MathieuMoalic/amumax/script"
 	"github.com/MathieuMoalic/amumax/util"
-	"math"
-	"reflect"
 )
 
 // An excitation, typically field or current,
@@ -33,7 +34,7 @@ func NewExcitation(name, unit, desc string) *Excitation {
 
 func (p *Excitation) MSlice() cuda.MSlice {
 	buf, r := p.Slice()
-	util.Assert(r == true)
+	util.Assert(r)
 	return cuda.ToMSlice(buf)
 }
 

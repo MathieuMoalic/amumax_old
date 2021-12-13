@@ -39,7 +39,7 @@ func (p *regionwise) MSlice() cuda.MSlice {
 		return cuda.MakeMSlice(data.NilSlice(p.NComp(), Mesh().Size()), p.getRegion(0))
 	} else {
 		buf, r := p.Slice()
-		util.Assert(r == true)
+		util.Assert(r)
 		return cuda.ToMSlice(buf)
 	}
 }
@@ -182,15 +182,6 @@ func NewDerivedParam(nComp int, parents []parent, updater func(*DerivedParam)) *
 		p.parents = append(p.parents, P)
 	}
 	return p
-}
-
-func (d *DerivedParam) init(nComp int, parents []parent, updater func(*DerivedParam)) {
-	d.lut.init(nComp, d) // pass myself to update me if needed
-	d.updater = updater
-	for _, p := range parents {
-		d.parents = append(d.parents, p)
-		p.addChild(d)
-	}
 }
 
 func (p *DerivedParam) invalidate() {

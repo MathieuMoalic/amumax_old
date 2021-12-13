@@ -1,10 +1,11 @@
 package engine
 
 import (
+	"math"
+
 	"github.com/MathieuMoalic/amumax/cuda"
 	"github.com/MathieuMoalic/amumax/data"
 	"github.com/MathieuMoalic/amumax/util"
-	"math"
 )
 
 // Classical 4th order RK solver.
@@ -76,4 +77,4 @@ func (rk *RK4) Step() {
 	}
 }
 
-func (_ *RK4) Free() {}
+func (*RK4) Free() {}

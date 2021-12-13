@@ -1,11 +1,11 @@
 package engine
 
 import (
+	"fmt"
 	"github.com/MathieuMoalic/amumax/cuda"
 	"github.com/MathieuMoalic/amumax/data"
 	"github.com/MathieuMoalic/amumax/util"
 	"math/rand"
-	"fmt"
 )
 
 func init() {
@@ -29,14 +29,6 @@ func (g *geom) init() {
 	g.buffer = nil
 	g.info = info{1, "geom", ""}
 	DeclROnly("geom", g, "Cell fill fraction (0..1)")
-}
-
-func spaceFill() float64 {
-	if geometry.Gpu().IsNil() {
-		return 1
-	} else {
-		return float64(cuda.Sum(geometry.buffer)) / float64(geometry.Mesh().NCell())
-	}
 }
 
 func (g *geom) Gpu() *data.Slice {

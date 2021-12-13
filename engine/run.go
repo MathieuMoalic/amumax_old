@@ -98,11 +98,6 @@ func torqueFn(dst *data.Slice) {
 	NEvals++
 }
 
-// returns number of torque evaluations
-func getNEval() int {
-	return NEvals
-}
-
 // update lastErr and peakErr
 func setLastErr(err float64) {
 	LastErr = err

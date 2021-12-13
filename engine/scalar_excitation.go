@@ -26,7 +26,7 @@ func NewScalarExcitation(name, unit, desc string) *ScalarExcitation {
 
 func (p *ScalarExcitation) MSlice() cuda.MSlice {
 	buf, r := p.Slice()
-	util.Assert(r == true)
+	util.Assert(r)
 	return cuda.ToMSlice(buf)
 }
 
@@ -42,10 +42,6 @@ func (e *ScalarExcitation) AddTo(dst *data.Slice) {
 		}
 		cuda.Madd2(dst, dst, t.mask, 1, mul)
 	}
-}
-
-func (e *ScalarExcitation) isZero() bool {
-	return e.perRegion.isZero() && len(e.extraTerms) == 0
 }
 
 func (e *ScalarExcitation) Slice() (*data.Slice, bool) {
