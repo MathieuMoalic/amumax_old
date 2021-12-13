@@ -68,7 +68,7 @@ func runInteractive() {
 
 	// setup outut dir
 	now := time.Now()
-	outdir := fmt.Sprintf("mumax-%v-%02d-%02d_%02dh%02d.out", now.Year(), int(now.Month()), now.Day(), now.Hour(), now.Minute())
+	outdir := fmt.Sprintf("/tmp/mumax-%v-%02d-%02d_%02dh%02d.out", now.Year(), int(now.Month()), now.Day(), now.Hour(), now.Minute())
 	engine.InitIO(outdir, outdir, *engine.Flag_forceclean)
 
 	engine.Timeout = 365 * 24 * time.Hour // basically forever
@@ -157,7 +157,7 @@ func goServeGUI() string {
 		return ""
 	}
 	addr := engine.GoServe(*engine.Flag_port)
-	fmt.Print("//starting GUI at http://127.0.0.1", addr, "\n")
+	fmt.Print("//starting GUI at http://127.0.0.1", addr, " or at http://ubuntu.wsl", addr,"\n")
 	return addr
 }
 

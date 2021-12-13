@@ -36,6 +36,10 @@ type DataTable struct {
 		io.Writer
 		Flush() error
 	}
+	output2 interface {
+		io.Writer
+		Flush() error
+	}
 	info
 	outputs []Quantity
 	autosave
@@ -85,6 +89,9 @@ func (t *DataTable) init() {
 	util.FatalErr(err)
 	t.output = f
 	// for zarr :
+	f2, err := httpfs.Create(OD() + "zarr_table")
+	util.FatalErr(err)
+	t.output2 = f2
 
 	// write header
 	header := t.Header()
@@ -152,7 +159,7 @@ func (t *DataTable) Save() {
 
 func (t *DataTable) Read() (data [][]float64, err error) {
 	if !t.inited() {
-		return nil, errors.New("Table is not initialized")
+		return nil, errors.New("table is not initialized")
 	}
 
 	t.flush()
