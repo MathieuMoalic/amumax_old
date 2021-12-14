@@ -23,6 +23,7 @@ func init() {
 
 var zarr_autonum = make(map[string]int)
 var zarr_output = make(map[Quantity]*zarr_autosave) // when to save quantities
+var ZarrGroups []string
 
 type zarr_autosave struct {
 	period float64 // How often to save
@@ -37,9 +38,26 @@ func (a *zarr_autosave) needSave() bool {
 	t := Time - a.start
 	return a.period != 0 && t-float64(a.count)*a.period >= a.period
 }
+func MakeZgroup(name string) {
+	exists := false
+	for _, v := range ZarrGroups {
+		if name == v {
+			exists = true
+			ZarrGroups = append(ZarrGroups, name)
+		}
+	}
+	if !exists {
+		fmt.Println("hi ?")
+		err := httpfs.Mkdir(OD() + name)
+		util.FatalErr(err)
+		InitZgroup(name + "/")
+	}
 
-func InitZgroup() {
-	zgroup, err := httpfs.Create(OD() + ".zgroup")
+}
+
+func InitZgroup(name string) {
+	fmt.Println("hello ???")
+	zgroup, err := httpfs.Create(OD() + name + ".zgroup")
 	util.FatalErr(err)
 	defer zgroup.Close()
 	zgroup.Write([]byte("{\"zarr_format\": 2}"))
