@@ -12,8 +12,10 @@ import (
 
 func init() {
 	DeclFunc("TableSave", ZarrTableSave, "Save the data table right now.")
+	DeclFunc("TableAdd", ZarrTableAdd, "Save the data table periodically.")
 	DeclFunc("TableAutoSave", ZarrTableAutoSave, "Save the data table periodically.")
 	go AutoFlush()
+
 }
 
 func float64ToByte(f float64) []byte {
@@ -28,30 +30,40 @@ type Writer struct {
 }
 
 type ZarrTable struct {
-	name     string
-	q        Quantity
-	writers  []*Writer
-	step     int
-	ncomp    int
-	autosave bool
-	period   float64
-	start    float64
+	name    string
+	q       Quantity
+	writers []*Writer
 }
 
 var ZarrTables []ZarrTable
+var ZarrTableAutoSavePeriod float64 = 0.0
+var ZarrTableAutoSaveStart float64 = 0.0
+var ZarrTableAutoSaveStep int = -1
+var ZarrTableFlushInterval time.Duration = 5 * time.Second
+var ZarrTableInit bool = false
 
 func (t *ZarrTable) WriteToBuffer() {
-	// fmt.Println("Printing to buffer")
 	for i, v := range AverageOf(t.q) {
 		t.writers[i].buffer = append(t.writers[i].buffer, float64ToByte(v)...)
 	}
-	t.step += 1
-	t.Flush()
-	// fmt.Println("tstep:", t.step)
 }
-func (t *ZarrTable) needSave() bool {
-	return t.period != 0 && (Time-t.start)-float64(t.step)*t.period >= t.period && t.autosave
+
+func (t *ZarrTable) Read() []float64 {
+	rawdata, err := httpfs.Read(fmt.Sprintf(`%vtable/%s/0.0`, OD(), t.name))
+	if err != nil {
+		fmt.Println("<<<<<< Read error")
+		return nil
+	}
+	var output []float64
+	count := 0
+	for i := 0; i < len(rawdata); i++ {
+		output[i] = Float64frombytes(rawdata[count*8 : (count+1)*8])
+		count++
+	}
+	fmt.Println(">>>>>>> table read:", output)
+	return output
 }
+
 func (t *ZarrTable) Flush() {
 	for _, writer := range t.writers {
 		writer.io.Write(writer.buffer)
@@ -59,17 +71,32 @@ func (t *ZarrTable) Flush() {
 		var b []byte
 		writer.buffer = b
 	}
-	ZarrTableSaveZarray(fmt.Sprintf(OD()+"table/%s/.zarray", t.name), t.step+1, t.ncomp)
+	ZarrTableSaveZarray(fmt.Sprintf(OD()+"table/%s/.zarray", t.name), t.q.NComp())
 }
 
-// return existing table else create new one
-func getTable(q Quantity, autosave bool, period float64) *ZarrTable {
-	for i, v := range ZarrTables {
-		if v.name == NameOf(q) {
-			return &ZarrTables[i]
+func Float64frombytes(bytes []byte) float64 {
+	bits := binary.LittleEndian.Uint64(bytes)
+	float := math.Float64frombits(bits)
+	return float
+}
+
+func AutoFlush() {
+	for {
+		for i := range ZarrTables {
+			ZarrTables[i].Flush()
 		}
+		time.Sleep(ZarrTableFlushInterval)
 	}
-	// if not in the list of tables, then create it
+}
+
+func ZarrTableSave() {
+	ZarrTableAutoSaveStep += 1
+	for i := range ZarrTables {
+		ZarrTables[i].WriteToBuffer()
+	}
+}
+
+func ZarrTableAdd(q Quantity) *ZarrTable {
 	MakeZgroup("table")
 	err := httpfs.Mkdir(OD() + "table/" + NameOf(q))
 	util.FatalErr(err)
@@ -81,30 +108,17 @@ func getTable(q Quantity, autosave bool, period float64) *ZarrTable {
 		var b []byte
 		writers = append(writers, &Writer{f, b})
 	}
-	z := ZarrTable{NameOf(q), q, writers, -1, q.NComp(), autosave, period, Time}
+	z := ZarrTable{NameOf(q), q, writers}
 	ZarrTables = append(ZarrTables, z)
 	return &z
 }
 
-func AutoFlush() {
-	for {
-		for _, v := range ZarrTables {
-			v.Flush()
-		}
-		time.Sleep(5 * time.Second)
-	}
+func ZarrTableAutoSave(period float64) {
+	ZarrTableAutoSaveStart = Time
+	ZarrTableAutoSavePeriod = period
 }
 
-func ZarrTableSave(q Quantity) {
-	t := getTable(q, false, 0.0)
-	t.WriteToBuffer()
-}
-func ZarrTableAutoSave(q Quantity, period float64) {
-	getTable(q, true, period)
-	// t.WriteToBuffer()
-}
-
-func ZarrTableSaveZarray(path string, nbtime int, ncomp int) {
+func ZarrTableSaveZarray(path string, ncomp int) {
 	var zarray_template = `{
 	"chunks": [1,%d],
 	"compressor": null,
@@ -118,6 +132,6 @@ func ZarrTableSaveZarray(path string, nbtime int, ncomp int) {
 	fzarray, err := httpfs.Create(path)
 	util.FatalErr(err)
 	defer fzarray.Close()
-	metadata := fmt.Sprintf(zarray_template, nbtime, ncomp, nbtime)
+	metadata := fmt.Sprintf(zarray_template, ZarrTableAutoSaveStep+1, ncomp, ZarrTableAutoSaveStep+1)
 	fzarray.Write([]byte(metadata))
 }

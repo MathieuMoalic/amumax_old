@@ -47,16 +47,15 @@ func MakeZgroup(name string) {
 		}
 	}
 	if !exists {
-		fmt.Println("hi ?")
 		err := httpfs.Mkdir(OD() + name)
 		util.FatalErr(err)
 		InitZgroup(name + "/")
+		ZarrGroups = append(ZarrGroups, name)
 	}
 
 }
 
 func InitZgroup(name string) {
-	fmt.Println("hello ???")
 	zgroup, err := httpfs.Create(OD() + name + ".zgroup")
 	util.FatalErr(err)
 	defer zgroup.Close()

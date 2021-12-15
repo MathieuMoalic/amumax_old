@@ -29,14 +29,10 @@ func DoOutput() {
 		}
 	}
 	if Table.needSave() {
-		fmt.Println("1 >>>>>>> Saving tables")
 		Table.Save()
 	}
-	for i := range ZarrTables {
-		if ZarrTables[i].needSave() {
-			fmt.Println("2 >>>>>>> Saving tables")
-			ZarrTables[i].WriteToBuffer()
-		}
+	if ZarrTableAutoSavePeriod != 0 && (Time-ZarrTableAutoSaveStart)-float64(ZarrTableAutoSaveStep)*ZarrTableAutoSavePeriod >= ZarrTableAutoSavePeriod {
+		ZarrTableSave()
 	}
 }
 

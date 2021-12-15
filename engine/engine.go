@@ -23,7 +23,7 @@ import (
 	"github.com/MathieuMoalic/amumax/zarr"
 )
 
-const VERSION = "mumax 3.10"
+const VERSION = "Amumax, fork of mumax 3.10"
 
 var UNAME = fmt.Sprintf("%s [%s_%s %s(%s) CUDA-%d.%d]",
 	VERSION, runtime.GOOS, runtime.GOARCH, runtime.Version(), runtime.Compiler,
