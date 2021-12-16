@@ -253,7 +253,7 @@ func (g *GammaCorrectionPainter) Paint(ss []Span, done bool) {
 			M = 0x1010101 // 255*M == 1<<32-1
 			N = 0x8080    // N = M>>9, and N < 1<<16-1
 		)
-		for i, _ := range ss {
+		for i := range ss {
 			if ss[i].A == 0 || ss[i].A == 1<<32-1 {
 				continue
 			}

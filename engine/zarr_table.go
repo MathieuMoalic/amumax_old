@@ -15,7 +15,6 @@ func init() {
 	DeclFunc("TableAdd", ZarrTableAdd, "Save the data table periodically.")
 	DeclFunc("TableAutoSave", ZarrTableAutoSave, "Save the data table periodically.")
 	go AutoFlush()
-
 }
 
 func float64ToByte(f float64) []byte {
@@ -40,7 +39,8 @@ var ZarrTableAutoSavePeriod float64 = 0.0
 var ZarrTableAutoSaveStart float64 = 0.0
 var ZarrTableAutoSaveStep int = -1
 var ZarrTableFlushInterval time.Duration = 5 * time.Second
-var ZarrTableInit bool = false
+var ZarrTableIsInit bool
+var ZarrTableTime Writer
 
 func (t *ZarrTable) WriteToBuffer() {
 	for i, v := range AverageOf(t.q) {
@@ -82,8 +82,14 @@ func Float64frombytes(bytes []byte) float64 {
 
 func AutoFlush() {
 	for {
-		for i := range ZarrTables {
-			ZarrTables[i].Flush()
+		if ZarrTableIsInit {
+			// flush the time table
+			ZarrTableTime.io.Write(ZarrTableTime.buffer)
+			ZarrTableTime.io.Flush()
+			// and all the other tables next
+			for i := range ZarrTables {
+				ZarrTables[i].Flush()
+			}
 		}
 		time.Sleep(ZarrTableFlushInterval)
 	}
@@ -91,16 +97,43 @@ func AutoFlush() {
 
 func ZarrTableSave() {
 	ZarrTableAutoSaveStep += 1
+	println(Time)
+	for _, v := range float64ToByte(Time) {
+		print(v)
+	}
+	println("")
+	ZarrTableTime.buffer = append(ZarrTableTime.buffer, float64ToByte(Time)...)
 	for i := range ZarrTables {
 		ZarrTables[i].WriteToBuffer()
 	}
 }
 
-func ZarrTableAdd(q Quantity) *ZarrTable {
+func ZarrTableInit() {
 	MakeZgroup("table")
+	ZarrTableIsInit = true
+	err := httpfs.Mkdir(OD() + "table/t")
+	util.FatalErr(err)
+	f, err := httpfs.Create(OD() + "table/t/0")
+	util.FatalErr(err)
+	var b []byte
+	ZarrTableTime = Writer{f, b}
+
+}
+
+func ZarrTableAdd(q Quantity) {
+	if !ZarrTableIsInit {
+		ZarrTableInit()
+	}
+	for i := range ZarrTables {
+		if ZarrTables[i].name == NameOf(q) {
+			util.Println(NameOf(q) + " was already added to the table")
+			return
+		}
+	}
+
 	err := httpfs.Mkdir(OD() + "table/" + NameOf(q))
 	util.FatalErr(err)
-	// one file = one writer for each comp
+	// one file = one writer = one component
 	var writers []*Writer
 	for comp := 0; comp < q.NComp(); comp++ {
 		f, err := httpfs.Create(OD() + "table/" + NameOf(q) + "/" + fmt.Sprint(comp) + ".0")
@@ -110,7 +143,6 @@ func ZarrTableAdd(q Quantity) *ZarrTable {
 	}
 	z := ZarrTable{NameOf(q), q, writers}
 	ZarrTables = append(ZarrTables, z)
-	return &z
 }
 
 func ZarrTableAutoSave(period float64) {

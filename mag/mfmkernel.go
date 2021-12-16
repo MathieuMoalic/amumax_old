@@ -3,11 +3,12 @@ package mag
 import (
 	"bufio"
 	"fmt"
+	"math"
+	"os"
+
 	d "github.com/MathieuMoalic/amumax/data"
 	"github.com/MathieuMoalic/amumax/oommf"
 	"github.com/MathieuMoalic/amumax/util"
-	"math"
-	"os"
 )
 
 func MFMKernel(mesh *d.Mesh, lift, tipsize float64, cacheDir string) (kernel [3]*d.Slice) {

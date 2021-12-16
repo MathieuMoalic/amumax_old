@@ -3,12 +3,13 @@ package mag
 import (
 	"bufio"
 	"fmt"
+	"math"
+	"os"
+
 	"github.com/MathieuMoalic/amumax/data"
 	"github.com/MathieuMoalic/amumax/oommf"
 	"github.com/MathieuMoalic/amumax/timer"
 	"github.com/MathieuMoalic/amumax/util"
-	"math"
-	"os"
 )
 
 // Obtains the demag kernel either from cacheDir/ or by calculating (and then storing in cacheDir for next time).

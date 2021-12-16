@@ -302,7 +302,7 @@ func (k *stroker) addNonCurvy2(b, c Point) {
 		t--
 		anorm = cnorm
 	}
-	panic("unreachable")
+
 }
 
 // Add1 adds a linear segment to the stroker.
