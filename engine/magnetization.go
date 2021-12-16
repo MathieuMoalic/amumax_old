@@ -1,10 +1,11 @@
 package engine
 
 import (
+	"reflect"
+
 	"github.com/MathieuMoalic/amumax/cuda"
 	"github.com/MathieuMoalic/amumax/data"
 	"github.com/MathieuMoalic/amumax/util"
-	"reflect"
 )
 
 var M magnetization // reduced magnetization (unit length)
@@ -53,9 +54,6 @@ func (m *magnetization) Set(c Config) {
 
 func (m *magnetization) LoadFile(fname string) {
 	m.SetArray(LoadFile(fname))
-}
-func (m *magnetization) ZarrLoadFile(fname string) {
-	m.SetArray(ZarrLoadFile(fname))
 }
 
 func (m *magnetization) Slice() (s *data.Slice, recycle bool) {

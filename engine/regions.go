@@ -104,30 +104,6 @@ func DefRegionCell(id int, x, y, z int) {
 	regions.gpuCache.Set(index, byte(id))
 }
 
-// Load regions from ovf file, use first component.
-// Regions should be between 0 and 256
-func (r *Regions) LoadFile(fname string) {
-	inSlice := LoadFile(fname)
-	n := r.Mesh().Size()
-	inSlice = data.Resample(inSlice, n)
-	inArr := inSlice.Tensors()[0]
-	l := r.HostList()
-	arr := reshapeBytes(l, n)
-
-	for iz := 0; iz < n[Z]; iz++ {
-		for iy := 0; iy < n[Y]; iy++ {
-			for ix := 0; ix < n[X]; ix++ {
-				val := inArr[iz][iy][ix]
-				if val < 0 || val > 256 {
-					util.Fatal("regions.LoadFile(", fname, "): all values should be between 0 & 256, have: ", val)
-				}
-				arr[iz][iy][ix] = byte(val)
-			}
-		}
-	}
-	r.gpuCache.Upload(l)
-}
-
 func (r *Regions) average() []float64 {
 	s, recycle := r.Slice()
 	if recycle {

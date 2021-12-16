@@ -10,10 +10,8 @@ import (
 
 	"github.com/MathieuMoalic/amumax/cuda"
 	"github.com/MathieuMoalic/amumax/data"
-	"github.com/MathieuMoalic/amumax/dump"
 	"github.com/MathieuMoalic/amumax/httpfs"
 	"github.com/MathieuMoalic/amumax/mag"
-	"github.com/MathieuMoalic/amumax/oommf"
 	"github.com/MathieuMoalic/amumax/util"
 	"github.com/MathieuMoalic/amumax/zarr"
 )
@@ -26,8 +24,7 @@ func init() {
 	DeclFunc("Vector", Vector, "Constructs a vector with given components")
 	DeclConst("Mu0", mag.Mu0, "Permittivity of vaccum (Tm/A)")
 	DeclFunc("Print", myprint, "Print to standard output")
-	DeclFunc("LoadFile", LoadFile, "Load a data file (ovf or dump)")
-	DeclFunc("ZarrLoadFile", ZarrLoadFile, "Load a zarr data file")
+	DeclFunc("LoadFile", LoadFile, "Load a zarr data file")
 	DeclFunc("Index2Coord", Index2Coord, "Convert cell index to x,y,z coordinate in meter")
 	DeclFunc("NewSlice", NewSlice, "Makes a 4D array with a specified number of components (first argument) "+
 		"and a specified size nx,ny,nz (remaining arguments)")
@@ -81,26 +78,12 @@ func Fprintln(filename string, msg ...interface{}) {
 	err := httpfs.Append(filename, []byte(fmt.Sprintln(myFmt(msg)...)))
 	util.FatalErr(err)
 }
-func ZarrLoadFile(fname string) *data.Slice {
+func LoadFile(fname string) *data.Slice {
 	// in, err := httpfs.Open(fname)
 	// util.FatalErr(err)
 	var s *data.Slice
 	s, _ = zarr.Read(fname)
 	// util.FatalErr(err)
-	return s
-}
-
-// Read a magnetization state from .dump file.
-func LoadFile(fname string) *data.Slice {
-	in, err := httpfs.Open(fname)
-	util.FatalErr(err)
-	var s *data.Slice
-	if path.Ext(fname) == ".dump" {
-		s, _, err = dump.Read(in)
-	} else {
-		s, _, err = oommf.Read(in)
-	}
-	util.FatalErr(err)
 	return s
 }
 

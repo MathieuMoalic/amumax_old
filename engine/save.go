@@ -9,7 +9,6 @@ import (
 	"github.com/MathieuMoalic/amumax/cuda"
 	"github.com/MathieuMoalic/amumax/data"
 	"github.com/MathieuMoalic/amumax/draw"
-	"github.com/MathieuMoalic/amumax/dump"
 	"github.com/MathieuMoalic/amumax/httpfs"
 	"github.com/MathieuMoalic/amumax/oommf"
 	"github.com/MathieuMoalic/amumax/util"
@@ -123,8 +122,6 @@ func saveAs_sync(fname string, s *data.Slice, info data.Meta, format OutputForma
 		oommf.WriteOVF2(f, s, info, "text")
 	case OVF2_BINARY:
 		oommf.WriteOVF2(f, s, info, "binary 4")
-	case DUMP:
-		dump.Write(f, s, info)
 	default:
 		panic("invalid output format")
 	}

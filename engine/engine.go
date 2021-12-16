@@ -55,7 +55,8 @@ func Close() {
 	drainOutput()
 	LogOut("********************** Simulation Ended ************************//")
 	Table.flush()
-	for _, v := range ZarrTables {
+	zTableTime.Flush()
+	for _, v := range zTables {
 		v.Flush()
 	}
 	if logfile != nil {

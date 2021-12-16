@@ -109,8 +109,8 @@ func CreatePlot(table *DataTable, xcol, ycol int) (img []byte, err error) {
 		return
 	}
 	// fmt.Println("|||||| old data :", data)
-	// if len(ZarrTables) > 0 {
-	// 	new_data := ZarrTables[0].Read()
+	// if len(zTables) > 0 {
+	// 	new_data := zTables[0].Read()
 	// 	fmt.Println("|||||| new data :", new_data)
 	// }
 

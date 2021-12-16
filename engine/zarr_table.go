@@ -11,11 +11,19 @@ import (
 )
 
 func init() {
-	DeclFunc("TableSave", ZarrTableSave, "Save the data table right now.")
-	DeclFunc("TableAdd", ZarrTableAdd, "Save the data table periodically.")
-	DeclFunc("TableAutoSave", ZarrTableAutoSave, "Save the data table periodically.")
+	DeclFunc("TableSave", zTableSave, "Save the data table right now.")
+	DeclFunc("TableAdd", zTableAdd, "Save the data table periodically.")
+	DeclFunc("TableAutoSave", zTableAutoSave, "Save the data table periodically.")
 	go AutoFlush()
 }
+
+var zTables []zTable
+var zTableAutoSavePeriod float64 = 0.0
+var zTableAutoSaveStart float64 = 0.0
+var zTableAutoSaveStep int = -1
+var zTableFlushInterval time.Duration = 5 * time.Second
+var zTableIsInit bool
+var zTableTime zTableTimeS
 
 func float64ToByte(f float64) []byte {
 	var buf [8]byte
@@ -23,32 +31,40 @@ func float64ToByte(f float64) []byte {
 	return buf[:]
 }
 
+type zTableTimeS struct {
+	io     httpfs.WriteCloseFlusher
+	buffer []byte
+}
+
+func (t *zTableTimeS) WriteToBuffer() {
+	t.buffer = append(t.buffer, float64ToByte(Time)...)
+}
+func (t *zTableTimeS) Flush() {
+	t.io.Write(t.buffer)
+	var b []byte
+	t.buffer = b
+	t.io.Flush()
+	zTableSavezay(OD()+"table/t/.zarray", 1)
+}
+
 type Writer struct {
 	io     httpfs.WriteCloseFlusher
 	buffer []byte
 }
 
-type ZarrTable struct {
+type zTable struct {
 	name    string
 	q       Quantity
 	writers []*Writer
 }
 
-var ZarrTables []ZarrTable
-var ZarrTableAutoSavePeriod float64 = 0.0
-var ZarrTableAutoSaveStart float64 = 0.0
-var ZarrTableAutoSaveStep int = -1
-var ZarrTableFlushInterval time.Duration = 5 * time.Second
-var ZarrTableIsInit bool
-var ZarrTableTime Writer
-
-func (t *ZarrTable) WriteToBuffer() {
+func (t *zTable) WriteToBuffer() {
 	for i, v := range AverageOf(t.q) {
 		t.writers[i].buffer = append(t.writers[i].buffer, float64ToByte(v)...)
 	}
 }
 
-func (t *ZarrTable) Read() []float64 {
+func (t *zTable) Read() []float64 {
 	rawdata, err := httpfs.Read(fmt.Sprintf(`%vtable/%s/0.0`, OD(), t.name))
 	if err != nil {
 		fmt.Println("<<<<<< Read error")
@@ -64,14 +80,14 @@ func (t *ZarrTable) Read() []float64 {
 	return output
 }
 
-func (t *ZarrTable) Flush() {
+func (t *zTable) Flush() {
 	for _, writer := range t.writers {
 		writer.io.Write(writer.buffer)
 		writer.io.Flush()
 		var b []byte
 		writer.buffer = b
 	}
-	ZarrTableSaveZarray(fmt.Sprintf(OD()+"table/%s/.zarray", t.name), t.q.NComp())
+	zTableSavezay(fmt.Sprintf(OD()+"table/%s/.zarray", t.name), t.q.NComp())
 }
 
 func Float64frombytes(bytes []byte) float64 {
@@ -82,50 +98,44 @@ func Float64frombytes(bytes []byte) float64 {
 
 func AutoFlush() {
 	for {
-		if ZarrTableIsInit {
+		if zTableIsInit {
 			// flush the time table
-			ZarrTableTime.io.Write(ZarrTableTime.buffer)
-			ZarrTableTime.io.Flush()
+			zTableTime.Flush()
 			// and all the other tables next
-			for i := range ZarrTables {
-				ZarrTables[i].Flush()
+			for i := range zTables {
+				zTables[i].Flush()
 			}
 		}
-		time.Sleep(ZarrTableFlushInterval)
+		time.Sleep(zTableFlushInterval)
 	}
 }
 
-func ZarrTableSave() {
-	ZarrTableAutoSaveStep += 1
-	println(Time)
-	for _, v := range float64ToByte(Time) {
-		print(v)
-	}
-	println("")
-	ZarrTableTime.buffer = append(ZarrTableTime.buffer, float64ToByte(Time)...)
-	for i := range ZarrTables {
-		ZarrTables[i].WriteToBuffer()
+func zTableSave() {
+	zTableAutoSaveStep += 1
+	zTableTime.WriteToBuffer()
+	for i := range zTables {
+		zTables[i].WriteToBuffer()
 	}
 }
 
-func ZarrTableInit() {
+func zTableInit() {
 	MakeZgroup("table")
-	ZarrTableIsInit = true
+	zTableIsInit = true
 	err := httpfs.Mkdir(OD() + "table/t")
 	util.FatalErr(err)
 	f, err := httpfs.Create(OD() + "table/t/0")
 	util.FatalErr(err)
 	var b []byte
-	ZarrTableTime = Writer{f, b}
+	zTableTime = zTableTimeS{f, b}
 
 }
 
-func ZarrTableAdd(q Quantity) {
-	if !ZarrTableIsInit {
-		ZarrTableInit()
+func zTableAdd(q Quantity) {
+	if !zTableIsInit {
+		zTableInit()
 	}
-	for i := range ZarrTables {
-		if ZarrTables[i].name == NameOf(q) {
+	for i := range zTables {
+		if zTables[i].name == NameOf(q) {
 			util.Println(NameOf(q) + " was already added to the table")
 			return
 		}
@@ -141,29 +151,38 @@ func ZarrTableAdd(q Quantity) {
 		var b []byte
 		writers = append(writers, &Writer{f, b})
 	}
-	z := ZarrTable{NameOf(q), q, writers}
-	ZarrTables = append(ZarrTables, z)
+	z := zTable{NameOf(q), q, writers}
+	zTables = append(zTables, z)
 }
 
-func ZarrTableAutoSave(period float64) {
-	ZarrTableAutoSaveStart = Time
-	ZarrTableAutoSavePeriod = period
+func zTableAutoSave(period float64) {
+	zTableAutoSaveStart = Time
+	zTableAutoSavePeriod = period
 }
 
-func ZarrTableSaveZarray(path string, ncomp int) {
+func zTableSavezay(path string, ncomp int) {
 	var zarray_template = `{
-	"chunks": [1,%d],
+	"chunks": [%s%d],
 	"compressor": null,
 	"dtype": "<f8",
 	"fill_value": 0.0,
 	"filters": null,
 	"order": "C",
-	"shape": [%d,%d],
+	"shape": [%s%d],
 	"zarr_format": 2
 }`
+	var s1 string
+	var s2 string
+	if ncomp == 1 {
+		s1 = ""
+		s2 = ""
+	} else {
+		s1 = "1,"
+		s2 = fmt.Sprintf("%d,", ncomp)
+	}
 	fzarray, err := httpfs.Create(path)
 	util.FatalErr(err)
 	defer fzarray.Close()
-	metadata := fmt.Sprintf(zarray_template, ZarrTableAutoSaveStep+1, ncomp, ZarrTableAutoSaveStep+1)
+	metadata := fmt.Sprintf(zarray_template, s1, zTableAutoSaveStep+1, s2, zTableAutoSaveStep+1)
 	fzarray.Write([]byte(metadata))
 }

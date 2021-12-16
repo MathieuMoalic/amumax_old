@@ -27,7 +27,7 @@ type JsonHell struct {
 	Filters    string
 	Order      string
 	Shape      string
-	ZarrFormat string
+	zFormat    string
 }
 
 func Read(fname string) (s *data.Slice, err error) {

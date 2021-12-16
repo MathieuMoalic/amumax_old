@@ -22,7 +22,7 @@ func DoOutput() {
 			a.count++
 		}
 	}
-	for q, a := range zarr_output {
+	for q, a := range zOutput {
 		if a.needSave() {
 			a.save(q, a.name)
 			a.count++
@@ -31,8 +31,8 @@ func DoOutput() {
 	if Table.needSave() {
 		Table.Save()
 	}
-	if ZarrTableAutoSavePeriod != 0 && (Time-ZarrTableAutoSaveStart)-float64(ZarrTableAutoSaveStep)*ZarrTableAutoSavePeriod >= ZarrTableAutoSavePeriod {
-		ZarrTableSave()
+	if zTableAutoSavePeriod != 0 && (Time-zTableAutoSaveStart)-float64(zTableAutoSaveStep)*zTableAutoSavePeriod >= zTableAutoSavePeriod {
+		zTableSave()
 	}
 }
 
