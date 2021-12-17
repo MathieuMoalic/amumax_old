@@ -3,6 +3,7 @@ package engine
 // Bookkeeping for auto-saving quantities at given intervals.
 
 import (
+	"encoding/json"
 	"fmt"
 	"unsafe"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/MathieuMoalic/amumax/data"
 	"github.com/MathieuMoalic/amumax/httpfs"
 	"github.com/MathieuMoalic/amumax/util"
+	"github.com/MathieuMoalic/amumax/zarr"
 )
 
 func init() {
@@ -21,70 +23,74 @@ func init() {
 	DeclFunc("Save", zSave, "Save space-dependent quantity as the zarr standard.")
 }
 
-var zAutonum = make(map[string]int)
-var zOutput = make(map[Quantity]*zAutosave) // when to save quantities
 var zGroups []string
+var zArrays = make(map[string]*zArray)
 
-type zAutosave struct {
-	period float64 // How often to save
-	start  float64 // Starting point
-	count  int     // Number of times it has been autosaved
+type zArray struct {
 	name   string
+	q      Quantity
+	period float64                // How often to save
+	start  float64                // Starting point
+	count  int                    // Number of times it has been autosaved
 	save   func(Quantity, string) // called to do the actual save
+	times  []float64
+	// zattrs httpfs.WriteCloseFlusher
 }
 
 // returns true when the time is right to save.
-func (a *zAutosave) needSave() bool {
-	t := Time - a.start
-	return a.period != 0 && t-float64(a.count)*a.period >= a.period
+func (a *zArray) needSave() bool {
+	return a.period != 0 && (Time-a.start)-float64(a.count)*a.period >= a.period
 }
-func MakeZgroup(name string) {
-	exists := false
-	for _, v := range zGroups {
-		if name == v {
-			exists = true
-			zGroups = append(zGroups, name)
-		}
-	}
-	if !exists {
-		err := httpfs.Mkdir(OD() + name)
-		util.FatalErr(err)
-		InitZgroup(name + "/")
-		zGroups = append(zGroups, name)
-	}
-
-}
-
-func InitZgroup(name string) {
-	zgroup, err := httpfs.Create(OD() + name + ".zgroup")
+func (a *zArray) SaveAttrs() {
+	// it's stupid and wasteful but it works
+	// keeping the whole array of times wastes a few MB or RAM
+	u, err := json.Marshal(zarr.Zattrs{Buffer: a.times})
 	util.FatalErr(err)
-	defer zgroup.Close()
-	zgroup.Write([]byte("{\"zarr_format\": 2}"))
+	httpfs.Remove(OD() + a.name + "/.zattrs")
+	httpfs.Put(OD()+a.name+"/.zattrs", []byte(string(u)))
+
 }
 
-// Register quant to be auto-saved every period.
-// period == 0 stops autosaving.
 func zAutoSave(q Quantity, period float64) {
 	zAutoSaveAs(q, NameOf(q), period)
 }
 
-func zAutoSaveAs(q Quantity, fname string, period float64) {
+func zInitArray(name string, q Quantity, period float64) {
+	httpfs.Mkdir(OD() + name)
+	var b []float64
+	// f, err := httpfs.Create(OD() + name + "/.zattrs")
+	// util.FatalErr(err)
+	zArrays[name] = &zArray{name, q, period, Time, -1, zSaveAs, b} // init count to -1 allows save at t=0
+
+}
+
+// period == 0 stops autosaving.
+func zAutoSaveAs(q Quantity, name string, period float64) {
 	if period == 0 {
-		delete(zOutput, q)
+		delete(zArrays, name)
 	} else {
-		zOutput[q] = &zAutosave{period, Time, -1, fname, zSaveAs} // init count to -1 allows save at t=0
+		zInitArray(name, q, period)
 	}
 }
 
-func zSaveAs(q Quantity, fname string) {
-	httpfs.Mkdir(OD() + fname)
+func zSaveAs(q Quantity, name string) {
+	// fmt.Println(">>>>>>>>>>>>>>>>>>>>>1")
+	// fmt.Println(zArrays)
+	if _, ok := zArrays[name]; !ok {
+		zInitArray(name, q, 0)
+	}
+	// fmt.Println("Saving ...")
+	// fmt.Println(zArrays[name].count)
 
+	zArrays[name].times = append(zArrays[name].times, Time)
+	zArrays[name].SaveAttrs()
 	buffer := ValueOf(q)
 	defer cuda.Recycle(buffer)
 	data := buffer.HostCopy() // must be copy (async io)
-	t := zAutonum[fname]      // no desync this way
-	queOutput(func() { zSyncSave(data, fname, t) })
-	zAutonum[fname]++
+	t := zArrays[name].count  // no desync this way
+	queOutput(func() { zSyncSave(data, name, t) })
+	zArrays[name].count++
+
 }
 
 // Save once, with auto file name
@@ -92,27 +98,9 @@ func zSave(q Quantity) {
 	zSaveAs(q, NameOf(q))
 }
 
-func zSavezay(path string, size [3]int, ncomp int, time int) {
-	var zarray_template = `{
-	"chunks": [1,%d,%d,%d,%d],
-	"compressor": {"id": "zstd","level": 1},
-	"dtype": "<f4",
-	"fill_value": 0.0,
-	"filters": null,
-	"order": "C",
-	"shape": [%d,%d,%d,%d,%d],
-	"zarr_format": 2
-}`
-	fzarray, err := httpfs.Create(path)
-	util.FatalErr(err)
-	defer fzarray.Close()
-	metadata := fmt.Sprintf(zarray_template, size[Z], size[Y], size[X], ncomp, time+1, size[Z], size[Y], size[X], ncomp)
-	fzarray.Write([]byte(metadata))
-}
-
 // synchronous save
 func zSyncSave(array *data.Slice, qname string, time int) {
-	f, err := httpfs.Create(fmt.Sprintf(OD()+"%s/%d.0.0.0.0", qname, time))
+	f, err := httpfs.Create(fmt.Sprintf(OD()+"%s/%d.0.0.0.0", qname, time+1))
 	util.FatalErr(err)
 	defer f.Close()
 
@@ -141,5 +129,5 @@ func zSyncSave(array *data.Slice, qname string, time int) {
 	f.Write(compressedData)
 
 	//.zarray file
-	zSavezay(fmt.Sprintf(OD()+"%s/.zarray", qname), size, ncomp, time)
+	zarr.SaveFileZarray(fmt.Sprintf(OD()+"%s/.zarray", qname), size, ncomp, time+1)
 }

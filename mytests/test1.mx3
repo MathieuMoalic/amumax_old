@@ -1,5 +1,5 @@
 Nx := 50
-Ny := 50
+Ny := 54
 Nz := 1
 dx := 5e-9
 dy := 5e-9
@@ -13,13 +13,13 @@ cir := circle(240e-9)
 m.setInShape(cir, vortex(1, 1))
 setgeom(cir)
 minimize()
-B_ext = vector(0, 0, 3e-2*sin(t*2*pi*2e9))
+// B_ext = vector(0, 0, 3e-2*sin(t*2*pi*2e9))
 
-oldtableadd(m)
-oldtableAutoSave(1e-10)
-tableadd(m)
-tableAutoSave(1e-10)
-// tableAutoSave(E_total, 3e-10)
-// tableAutoSave(B_ext, 2e-10)
-run(1e-9)
-// tableSave(E_total)
+// saveas(m, "notstable")
+// tableadd(m)
+// tableadd(E_total)
+// tableAutoSave(1e-11)
+// autosave(m, 1e-10)
+// autosaveas(b_demag, "b", 1e-10)
+// run(1e-9)
+// saveas(m, "final")

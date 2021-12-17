@@ -22,10 +22,10 @@ func DoOutput() {
 			a.count++
 		}
 	}
-	for q, a := range zOutput {
-		if a.needSave() {
-			a.save(q, a.name)
-			a.count++
+	for k, v := range zArrays {
+		if v.needSave() {
+			v.save(v.q, k)
+			// v.count++
 		}
 	}
 	if Table.needSave() {

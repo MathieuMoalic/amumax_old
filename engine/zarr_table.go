@@ -1,13 +1,12 @@
 package engine
 
 import (
-	"encoding/binary"
 	"fmt"
-	"math"
 	"time"
 
 	"github.com/MathieuMoalic/amumax/httpfs"
 	"github.com/MathieuMoalic/amumax/util"
+	"github.com/MathieuMoalic/amumax/zarr"
 )
 
 func init() {
@@ -25,26 +24,20 @@ var zTableFlushInterval time.Duration = 5 * time.Second
 var zTableIsInit bool
 var zTableTime zTableTimeS
 
-func float64ToByte(f float64) []byte {
-	var buf [8]byte
-	binary.LittleEndian.PutUint64(buf[:], math.Float64bits(f))
-	return buf[:]
-}
-
 type zTableTimeS struct {
 	io     httpfs.WriteCloseFlusher
 	buffer []byte
 }
 
 func (t *zTableTimeS) WriteToBuffer() {
-	t.buffer = append(t.buffer, float64ToByte(Time)...)
+	t.buffer = append(t.buffer, zarr.Float64ToByte(Time)...)
 }
 func (t *zTableTimeS) Flush() {
 	t.io.Write(t.buffer)
 	var b []byte
 	t.buffer = b
 	t.io.Flush()
-	zTableSavezay(OD()+"table/t/.zarray", 1)
+	zarr.SaveFileTableZarray(OD()+"table/t/.zarray", 1, zTableAutoSaveStep)
 }
 
 type Writer struct {
@@ -60,7 +53,7 @@ type zTable struct {
 
 func (t *zTable) WriteToBuffer() {
 	for i, v := range AverageOf(t.q) {
-		t.writers[i].buffer = append(t.writers[i].buffer, float64ToByte(v)...)
+		t.writers[i].buffer = append(t.writers[i].buffer, zarr.Float64ToByte(v)...)
 	}
 }
 
@@ -73,7 +66,7 @@ func (t *zTable) Read() []float64 {
 	var output []float64
 	count := 0
 	for i := 0; i < len(rawdata); i++ {
-		output[i] = Float64frombytes(rawdata[count*8 : (count+1)*8])
+		output[i] = zarr.Float64frombytes(rawdata[count*8 : (count+1)*8])
 		count++
 	}
 	fmt.Println(">>>>>>> table read:", output)
@@ -87,21 +80,25 @@ func (t *zTable) Flush() {
 		var b []byte
 		writer.buffer = b
 	}
-	zTableSavezay(fmt.Sprintf(OD()+"table/%s/.zarray", t.name), t.q.NComp())
+	zarr.SaveFileTableZarray(fmt.Sprintf(OD()+"table/%s/.zarray", t.name), t.q.NComp(), zTableAutoSaveStep)
 }
 
-func Float64frombytes(bytes []byte) float64 {
-	bits := binary.LittleEndian.Uint64(bytes)
-	float := math.Float64frombits(bits)
-	return float
+func TableInit() {
+	zarr.MakeZgroup("table", OD(), &zGroups)
+	zTableIsInit = true
+	err := httpfs.Mkdir(OD() + "table/t")
+	util.FatalErr(err)
+	f, err := httpfs.Create(OD() + "table/t/0")
+	util.FatalErr(err)
+	var b []byte
+	zTableTime = zTableTimeS{f, b}
+
 }
 
 func AutoFlush() {
 	for {
 		if zTableIsInit {
-			// flush the time table
 			zTableTime.Flush()
-			// and all the other tables next
 			for i := range zTables {
 				zTables[i].Flush()
 			}
@@ -118,21 +115,9 @@ func zTableSave() {
 	}
 }
 
-func zTableInit() {
-	MakeZgroup("table")
-	zTableIsInit = true
-	err := httpfs.Mkdir(OD() + "table/t")
-	util.FatalErr(err)
-	f, err := httpfs.Create(OD() + "table/t/0")
-	util.FatalErr(err)
-	var b []byte
-	zTableTime = zTableTimeS{f, b}
-
-}
-
 func zTableAdd(q Quantity) {
 	if !zTableIsInit {
-		zTableInit()
+		TableInit()
 	}
 	for i := range zTables {
 		if zTables[i].name == NameOf(q) {
@@ -158,31 +143,4 @@ func zTableAdd(q Quantity) {
 func zTableAutoSave(period float64) {
 	zTableAutoSaveStart = Time
 	zTableAutoSavePeriod = period
-}
-
-func zTableSavezay(path string, ncomp int) {
-	var zarray_template = `{
-	"chunks": [%s%d],
-	"compressor": null,
-	"dtype": "<f8",
-	"fill_value": 0.0,
-	"filters": null,
-	"order": "C",
-	"shape": [%s%d],
-	"zarr_format": 2
-}`
-	var s1 string
-	var s2 string
-	if ncomp == 1 {
-		s1 = ""
-		s2 = ""
-	} else {
-		s1 = "1,"
-		s2 = fmt.Sprintf("%d,", ncomp)
-	}
-	fzarray, err := httpfs.Create(path)
-	util.FatalErr(err)
-	defer fzarray.Close()
-	metadata := fmt.Sprintf(zarray_template, s1, zTableAutoSaveStep+1, s2, zTableAutoSaveStep+1)
-	fzarray.Write([]byte(metadata))
 }
