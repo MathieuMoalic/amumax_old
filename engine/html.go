@@ -8,7 +8,7 @@ const templText = `
 
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-	<title> mumax3 </title>
+	<title> amumax </title>
 
 ` + CSS + `
 
@@ -163,6 +163,7 @@ const templText = `
 
 </div>
 
+<
 
 {{.Data.Div "mesh"}}
 
@@ -271,7 +272,7 @@ m = {{.Data.Configs | .SelectArray "mselect" "Uniform"}} {{.TextBox "margs" "(1,
 	TableAutosave: {{.TextBox "tableAutoSave" "0" }}  s 
 </p>
 <p>
-	Plot columns {{.TextBox "usingx" "0" "size=1"}} and {{.TextBox "usingy" "1" "size=1"}} of "table.txt".
+	Plot columns {{.TextBox "usingx" "t" "size=1"}} and {{.TextBox "usingy" "B_demag" "size=1"}} of "table.txt".
 </p>
 <p class=ErrorBox>{{.Span "plotErr" ""}}</p>
 {{.Img "plot" "/plot/"}}

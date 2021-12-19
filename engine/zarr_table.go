@@ -13,31 +13,30 @@ func init() {
 	DeclFunc("TableSave", zTableSave, "Save the data table right now.")
 	DeclFunc("TableAdd", zTableAdd, "Save the data table periodically.")
 	DeclFunc("TableAutoSave", zTableAutoSave, "Save the data table periodically.")
-	go AutoFlush()
 }
 
-var zTables []zTable
+var zTables = make(map[string]*zTable)
 var zTableAutoSavePeriod float64 = 0.0
 var zTableAutoSaveStart float64 = 0.0
-var zTableAutoSaveStep int = -1
+var zTableStep int = -1
 var zTableFlushInterval time.Duration = 5 * time.Second
-var zTableIsInit bool
 var zTableTime zTableTimeS
 
 type zTableTimeS struct {
 	io     httpfs.WriteCloseFlusher
 	buffer []byte
+	data   []float64
 }
 
 func (t *zTableTimeS) WriteToBuffer() {
 	t.buffer = append(t.buffer, zarr.Float64ToByte(Time)...)
+	t.data = append(t.data, Time)
 }
 func (t *zTableTimeS) Flush() {
 	t.io.Write(t.buffer)
-	var b []byte
-	t.buffer = b
+	t.buffer = []byte{}
 	t.io.Flush()
-	zarr.SaveFileTableZarray(OD()+"table/t/.zarray", 1, zTableAutoSaveStep)
+	zarr.SaveFileTableZarray(OD()+"table/t/.zarray", 1, zTableStep)
 }
 
 type Writer struct {
@@ -49,95 +48,79 @@ type zTable struct {
 	name    string
 	q       Quantity
 	writers []*Writer
+	data    [][]float64
 }
 
 func (t *zTable) WriteToBuffer() {
 	for i, v := range AverageOf(t.q) {
 		t.writers[i].buffer = append(t.writers[i].buffer, zarr.Float64ToByte(v)...)
+		t.data[i] = append(t.data[i], v)
 	}
-}
-
-func (t *zTable) Read() []float64 {
-	rawdata, err := httpfs.Read(fmt.Sprintf(`%vtable/%s/0.0`, OD(), t.name))
-	if err != nil {
-		fmt.Println("<<<<<< Read error")
-		return nil
-	}
-	var output []float64
-	count := 0
-	for i := 0; i < len(rawdata); i++ {
-		output[i] = zarr.Float64frombytes(rawdata[count*8 : (count+1)*8])
-		count++
-	}
-	fmt.Println(">>>>>>> table read:", output)
-	return output
 }
 
 func (t *zTable) Flush() {
 	for _, writer := range t.writers {
 		writer.io.Write(writer.buffer)
 		writer.io.Flush()
-		var b []byte
-		writer.buffer = b
+		writer.buffer = []byte{}
 	}
-	zarr.SaveFileTableZarray(fmt.Sprintf(OD()+"table/%s/.zarray", t.name), t.q.NComp(), zTableAutoSaveStep)
+	zarr.SaveFileTableZarray(fmt.Sprintf(OD()+"table/%s/.zarray", t.name), t.q.NComp(), zTableStep)
 }
 
 func TableInit() {
 	zarr.MakeZgroup("table", OD(), &zGroups)
-	zTableIsInit = true
 	err := httpfs.Mkdir(OD() + "table/t")
 	util.FatalErr(err)
 	f, err := httpfs.Create(OD() + "table/t/0")
 	util.FatalErr(err)
-	var b []byte
-	zTableTime = zTableTimeS{f, b}
+	zTableTime = zTableTimeS{f, []byte{}, []float64{}}
+	go AutoFlush()
 
 }
 
 func AutoFlush() {
 	for {
-		if zTableIsInit {
-			zTableTime.Flush()
-			for i := range zTables {
-				zTables[i].Flush()
-			}
+		zTableTime.Flush()
+		for i := range zTables {
+			zTables[i].Flush()
 		}
 		time.Sleep(zTableFlushInterval)
 	}
 }
 
 func zTableSave() {
-	zTableAutoSaveStep += 1
+	zTableStep += 1
 	zTableTime.WriteToBuffer()
-	for i := range zTables {
-		zTables[i].WriteToBuffer()
+	for _, t := range zTables {
+		t.WriteToBuffer()
 	}
 }
 
 func zTableAdd(q Quantity) {
-	if !zTableIsInit {
+	if len(zTables) == 0 {
 		TableInit()
 	}
-	for i := range zTables {
-		if zTables[i].name == NameOf(q) {
-			util.Println(NameOf(q) + " was already added to the table")
-			return
-		}
+	if _, exists := zTables[NameOf(q)]; exists {
+		util.Println(NameOf(q) + " was already added to the table")
+		return
+	}
+	if zTableStep != -1 {
+		util.Fatal("Add Table Quantity BEFORE you save the table for the first time")
 	}
 
 	err := httpfs.Mkdir(OD() + "table/" + NameOf(q))
 	util.FatalErr(err)
 	// one file = one writer = one component
 	var writers []*Writer
+	var data [][]float64
 	for comp := 0; comp < q.NComp(); comp++ {
 		f, err := httpfs.Create(OD() + "table/" + NameOf(q) + "/" + fmt.Sprint(comp) + ".0")
 		util.FatalErr(err)
-		var b []byte
-		writers = append(writers, &Writer{f, b})
+		writers = append(writers, &Writer{f, []byte{}})
+		data = append(data, []float64{})
 	}
-	z := zTable{NameOf(q), q, writers}
-	zTables = append(zTables, z)
+	fmt.Println(">>>>>>>", data)
+	zTables[NameOf(q)] = &zTable{NameOf(q), q, writers, data}
 }
 
 func zTableAutoSave(period float64) {

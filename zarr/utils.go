@@ -16,7 +16,7 @@ import (
 // 	init   bool
 // }
 type Zattrs struct {
-	Buffer []float64
+	Buffer []float64 `json:"t"`
 }
 
 func SaveMetaStart(fname string, m data.Mesh, dt float64, start_time time.Time) {

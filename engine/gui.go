@@ -2,11 +2,8 @@ package engine
 
 import (
 	"fmt"
-	"github.com/MathieuMoalic/amumax/cuda"
-	"github.com/MathieuMoalic/amumax/cuda/cu"
-	"github.com/MathieuMoalic/amumax/gui"
-	"github.com/MathieuMoalic/amumax/httpfs"
-	"github.com/MathieuMoalic/amumax/util"
+	"image"
+	"image/png"
 	"math/rand"
 	"net"
 	"net/http"
@@ -15,6 +12,12 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/MathieuMoalic/amumax/cuda"
+	"github.com/MathieuMoalic/amumax/cuda/cu"
+	"github.com/MathieuMoalic/amumax/gui"
+	"github.com/MathieuMoalic/amumax/httpfs"
+	"github.com/MathieuMoalic/amumax/util"
 )
 
 // global GUI state stores what is currently shown in the web page.
@@ -31,6 +34,25 @@ type guistate struct {
 	mutex              sync.Mutex          // protects eventCacheBreaker and keepalive
 	_eventCacheBreaker int                 // changed on any event to make sure display is updated
 	keepalive          time.Time
+}
+
+func (g *guistate) ServePlot(w http.ResponseWriter, r *http.Request) {
+	if tableplot == nil {
+		tableplot = zNewPlot(&Table)
+	}
+	tableplot.SelectDataColumns(g.StringValue("usingx"), g.StringValue("usingy"))
+	// tableplot.SelectDataColumns("t", "B_demag")
+	w.Header().Set("Content-Type", "image/png")
+	if len(zTables) > 0 {
+		_, err := tableplot.WriteTo(w)
+		if err != nil {
+			png.Encode(w, image.NewNRGBA(image.Rect(0, 0, 4, 4)))
+			g.Set("plotErr", "Plot Error: "+err.Error())
+		} else {
+			g.Set("plotErr", "")
+		}
+	}
+
 }
 
 // Returns the time when updateKeepAlive was called.
@@ -104,7 +126,7 @@ func (g *guistate) PrepareServer() {
 
 	http.Handle("/", g)
 	http.HandleFunc("/render/", g.ServeRender)
-	http.HandleFunc("/plot/", g.servePlot)
+	http.HandleFunc("/plot/", g.ServePlot)
 
 	g.Set("title", util.NoExt(OD()[:len(OD())-1]))
 	g.prepareConsole()

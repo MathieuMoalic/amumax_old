@@ -34,7 +34,6 @@ type zArray struct {
 	count  int                    // Number of times it has been autosaved
 	save   func(Quantity, string) // called to do the actual save
 	times  []float64
-	// zattrs httpfs.WriteCloseFlusher
 }
 
 // returns true when the time is right to save.
@@ -43,7 +42,7 @@ func (a *zArray) needSave() bool {
 }
 func (a *zArray) SaveAttrs() {
 	// it's stupid and wasteful but it works
-	// keeping the whole array of times wastes a few MB or RAM
+	// keeping the whole array of times wastes a few MB of RAM
 	u, err := json.Marshal(zarr.Zattrs{Buffer: a.times})
 	util.FatalErr(err)
 	httpfs.Remove(OD() + a.name + "/.zattrs")
@@ -58,8 +57,6 @@ func zAutoSave(q Quantity, period float64) {
 func zInitArray(name string, q Quantity, period float64) {
 	httpfs.Mkdir(OD() + name)
 	var b []float64
-	// f, err := httpfs.Create(OD() + name + "/.zattrs")
-	// util.FatalErr(err)
 	zArrays[name] = &zArray{name, q, period, Time, -1, zSaveAs, b} // init count to -1 allows save at t=0
 
 }
@@ -74,14 +71,9 @@ func zAutoSaveAs(q Quantity, name string, period float64) {
 }
 
 func zSaveAs(q Quantity, name string) {
-	// fmt.Println(">>>>>>>>>>>>>>>>>>>>>1")
-	// fmt.Println(zArrays)
 	if _, ok := zArrays[name]; !ok {
 		zInitArray(name, q, 0)
 	}
-	// fmt.Println("Saving ...")
-	// fmt.Println(zArrays[name].count)
-
 	zArrays[name].times = append(zArrays[name].times, Time)
 	zArrays[name].SaveAttrs()
 	buffer := ValueOf(q)
