@@ -12,13 +12,13 @@ gammall = 187e9
 cir := circle(240e-9)
 m.setInShape(cir, vortex(1, 1))
 setgeom(cir)
+minimize()
+B_ext = vector(0, 0, 3e-2*sin(t*2*pi*2e9))
+
 tableadd(m)
 tableadd(b_demag)
 tableadd(E_total)
 tableAutoSave(1e-10)
-minimize()
-B_ext = vector(0, 0, 3e-2*sin(t*2*pi*2e9))
-
 // saveas(m, "notstable")
 // tableadd(E_total)
 // autosave(m, 1e-10)

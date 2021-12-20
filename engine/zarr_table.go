@@ -119,7 +119,6 @@ func zTableAdd(q Quantity) {
 		writers = append(writers, &Writer{f, []byte{}})
 		data = append(data, []float64{})
 	}
-	fmt.Println(">>>>>>>", data)
 	zTables[NameOf(q)] = &zTable{NameOf(q), q, writers, data}
 }
 

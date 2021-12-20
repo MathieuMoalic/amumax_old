@@ -14,6 +14,11 @@ CGO_CFLAGS_ALLOW='(-fno-schedule-insns|-malign-double|-ffast-math)'
 all: cudakernels hooks
 	go install -v $(GO_BUILDFLAGS) github.com/mumax/3/...
 
+run:
+	cd frontend && npm run build && cd ..
+	go build
+	./amumax -i
+
 cudakernels:
 	cd cuda && $(MAKE)
 
