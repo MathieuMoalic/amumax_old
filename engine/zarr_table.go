@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/MathieuMoalic/amumax/httpfs"
@@ -10,61 +9,54 @@ import (
 )
 
 func init() {
-	DeclFunc("TableSave", zTableSave, "Save the data table right now.")
-	DeclFunc("TableAdd", zTableAdd, "Save the data table periodically.")
-	DeclFunc("TableAutoSave", zTableAutoSave, "Save the data table periodically.")
+	DeclFunc("TableSave", ZTableSave, "Save the data table right now.")
+	DeclFunc("TableAdd", ZTableAdd, "Save the data table periodically.")
+	DeclFunc("TableAutoSave", ZTableAutoSave, "Save the data table periodically.")
+	ZTables = ZTablesStruct{Step: -1, AutoSavePeriod: 0.0, FlushInterval: 5 * time.Second}
 }
 
-var zTables = make(map[string]*zTable)
-var zTableAutoSavePeriod float64 = 0.0
-var zTableAutoSaveStart float64 = 0.0
-var zTableStep int = -1
-var zTableFlushInterval time.Duration = 5 * time.Second
-var zTableTime zTableTimeS
+var ZTables ZTablesStruct
 
-type zTableTimeS struct {
-	io     httpfs.WriteCloseFlusher
+type ZTablesStruct struct {
+	Tables         []ZTable `json:"Tables"`
+	Qs             []Quantity
+	AutoSavePeriod float64       `json:"AutoSavePeriod"`
+	AutoSaveStart  float64       `json:"AutoSaveStart"`
+	Step           int           `json:"Step"`
+	FlushInterval  time.Duration `json:"FlushInterval"`
+}
+
+type ZTable struct {
+	Name   string    `json:"Name"`
+	Data   []float64 `json:"Data"`
 	buffer []byte
-	data   []float64
-}
-
-func (t *zTableTimeS) WriteToBuffer() {
-	t.buffer = append(t.buffer, zarr.Float64ToByte(Time)...)
-	t.data = append(t.data, Time)
-}
-func (t *zTableTimeS) Flush() {
-	t.io.Write(t.buffer)
-	t.buffer = []byte{}
-	t.io.Flush()
-	zarr.SaveFileTableZarray(OD()+"table/t/.zarray", 1, zTableStep)
-}
-
-type Writer struct {
 	io     httpfs.WriteCloseFlusher
-	buffer []byte
 }
 
-type zTable struct {
-	name    string
-	q       Quantity
-	writers []*Writer
-	data    [][]float64
-}
-
-func (t *zTable) WriteToBuffer() {
-	for i, v := range AverageOf(t.q) {
-		t.writers[i].buffer = append(t.writers[i].buffer, zarr.Float64ToByte(v)...)
-		t.data[i] = append(t.data[i], v)
+func (ts *ZTablesStruct) WriteToBuffer() {
+	buf := []float64{}
+	// always save the current time
+	buf = append(buf, Time)
+	// for each quantity we append each component to the buffer
+	for _, q := range ts.Qs {
+		buf = append(buf, AverageOf(q)...)
+	}
+	// size of buf should be same as size of []Ztable
+	for i, b := range buf {
+		ts.Tables[i].buffer = append(ts.Tables[i].buffer, zarr.Float64ToByte(b)...)
+		ts.Tables[i].Data = append(ts.Tables[i].Data, b)
 	}
 }
-
-func (t *zTable) Flush() {
-	for _, writer := range t.writers {
-		writer.io.Write(writer.buffer)
-		writer.io.Flush()
-		writer.buffer = []byte{}
+func (ts *ZTablesStruct) Flush() {
+	for i := range ts.Tables {
+		ts.Tables[i].io.Write(ts.Tables[i].buffer)
+		ts.Tables[i].buffer = []byte{}
+		ts.Tables[i].io.Flush()
+		zarr.SaveFileTableZarray(OD()+"table/"+ts.Tables[i].Name+"/.zarray", ts.Step)
 	}
-	zarr.SaveFileTableZarray(fmt.Sprintf(OD()+"table/%s/.zarray", t.name), t.q.NComp(), zTableStep)
+}
+func (ts *ZTablesStruct) NeedSave() bool {
+	return ts.AutoSavePeriod != 0 && (Time-ts.AutoSaveStart)-float64(ts.Step)*ts.AutoSavePeriod >= ts.AutoSavePeriod
 }
 
 func TableInit() {
@@ -73,56 +65,50 @@ func TableInit() {
 	util.FatalErr(err)
 	f, err := httpfs.Create(OD() + "table/t/0")
 	util.FatalErr(err)
-	zTableTime = zTableTimeS{f, []byte{}, []float64{}}
+	ZTables.Tables = append(ZTables.Tables, ZTable{"t", []float64{}, []byte{}, f})
 	go AutoFlush()
 
 }
 
 func AutoFlush() {
 	for {
-		zTableTime.Flush()
-		for i := range zTables {
-			zTables[i].Flush()
-		}
-		time.Sleep(zTableFlushInterval)
+		ZTables.Flush()
+		time.Sleep(ZTables.FlushInterval)
 	}
 }
 
-func zTableSave() {
-	zTableStep += 1
-	zTableTime.WriteToBuffer()
-	for _, t := range zTables {
-		t.WriteToBuffer()
-	}
+func ZTableSave() {
+	ZTables.Step += 1
+	ZTables.WriteToBuffer()
 }
 
-func zTableAdd(q Quantity) {
-	if len(zTables) == 0 {
+func CreateTable(name string) ZTable {
+	err := httpfs.Mkdir(OD() + "table/" + name)
+	util.FatalErr(err)
+	f, err := httpfs.Create(OD() + "table/" + name + "/0")
+	util.FatalErr(err)
+	return ZTable{Name: name, Data: []float64{}, buffer: []byte{}, io: f}
+}
+
+func ZTableAdd(q Quantity) {
+	if len(ZTables.Tables) == 0 {
 		TableInit()
 	}
-	if _, exists := zTables[NameOf(q)]; exists {
-		util.Println(NameOf(q) + " was already added to the table")
-		return
-	}
-	if zTableStep != -1 {
+	if ZTables.Step != -1 {
 		util.Fatal("Add Table Quantity BEFORE you save the table for the first time")
 	}
-
-	err := httpfs.Mkdir(OD() + "table/" + NameOf(q))
-	util.FatalErr(err)
-	// one file = one writer = one component
-	var writers []*Writer
-	var data [][]float64
-	for comp := 0; comp < q.NComp(); comp++ {
-		f, err := httpfs.Create(OD() + "table/" + NameOf(q) + "/" + fmt.Sprint(comp) + ".0")
-		util.FatalErr(err)
-		writers = append(writers, &Writer{f, []byte{}})
-		data = append(data, []float64{})
+	ZTables.Qs = append(ZTables.Qs, q)
+	if q.NComp() == 1 {
+		ZTables.Tables = append(ZTables.Tables, CreateTable(NameOf(q)))
+	} else {
+		suffixes := []string{"x", "y", "z"}
+		for comp := 0; comp < q.NComp(); comp++ {
+			ZTables.Tables = append(ZTables.Tables, CreateTable(NameOf(q)+suffixes[comp]))
+		}
 	}
-	zTables[NameOf(q)] = &zTable{NameOf(q), q, writers, data}
 }
 
-func zTableAutoSave(period float64) {
-	zTableAutoSaveStart = Time
-	zTableAutoSavePeriod = period
+func ZTableAutoSave(period float64) {
+	ZTables.AutoSaveStart = Time
+	ZTables.AutoSavePeriod = period
 }
