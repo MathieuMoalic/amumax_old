@@ -31,8 +31,8 @@ func DoOutput() {
 	if Table.needSave() {
 		Table.Save()
 	}
-	if zTableAutoSavePeriod != 0 && (Time-zTableAutoSaveStart)-float64(zTableStep)*zTableAutoSavePeriod >= zTableAutoSavePeriod {
-		zTableSave()
+	if ZTables.NeedSave() {
+		ZTableSave()
 	}
 }
 

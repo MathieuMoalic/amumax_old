@@ -1,5 +1,5 @@
 Nx := 50
-Ny := 54
+Ny := 50
 Nz := 1
 dx := 5e-9
 dy := 5e-9
@@ -23,6 +23,6 @@ tableAutoSave(1e-10)
 // tableadd(E_total)
 // autosave(m, 1e-10)
 // autosaveas(b_demag, "b", 1e-10)
-run(10e-9)
+run(1e-9)
 // saveas(m, "final")
 

@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"bytes"
 	"image"
 	"image/jpeg"
 	"math"
@@ -12,14 +13,14 @@ import (
 	"github.com/MathieuMoalic/amumax/draw"
 )
 
-type render struct {
-	mutex        sync.Mutex
+type Render struct {
+	Mutex        sync.Mutex
 	quant        Quantity
 	comp         string
 	layer, scale int
 	rescaleBuf   *data.Slice // GPU
 	imgBuf       *data.Slice // CPU
-	img_         *image.RGBA
+	Img          *image.RGBA
 }
 
 const (
@@ -29,15 +30,26 @@ const (
 
 // Render image of quantity.
 func (g *guistate) ServeRender(w http.ResponseWriter, r *http.Request) {
-	g.render.mutex.Lock()
-	defer g.render.mutex.Unlock()
+	g.Render.Mutex.Lock()
+	defer g.Render.Mutex.Unlock()
 
-	g.render.render()
-	jpeg.Encode(w, g.render.img_, &jpeg.Options{Quality: 100})
+	g.Render.Render()
+	jpeg.Encode(w, g.Render.Img, &jpeg.Options{Quality: 100})
+}
+
+func (g *guistate) GetRenderedImg() *bytes.Buffer {
+	g.Render.Mutex.Lock()
+	defer g.Render.Mutex.Unlock()
+
+	g.Render.Render()
+	buff := bytes.NewBuffer([]byte{})
+	jpeg.Encode(buff, g.Render.Img, &jpeg.Options{Quality: 100})
+	return buff
+
 }
 
 // rescale and download quantity, save in rescaleBuf
-func (ren *render) download() {
+func (ren *Render) download() {
 	InjectAndWait(func() {
 		if ren.quant == nil { // not yet set, default = m
 			ren.quant = &M
@@ -101,7 +113,7 @@ func (ren *render) download() {
 
 var arrowSize = 16
 
-func (ren *render) render() {
+func (ren *Render) Render() {
 	ren.download()
 	// imgBuf always has 3 components, we may need just one...
 	d := ren.imgBuf
@@ -116,10 +128,10 @@ func (ren *render) render() {
 	if quant.NComp() == 1 { // ...or if the original data only had one (!)
 		d = d.Comp(0)
 	}
-	if ren.img_ == nil {
-		ren.img_ = new(image.RGBA)
+	if ren.Img == nil {
+		ren.Img = new(image.RGBA)
 	}
-	draw.On(ren.img_, d, "auto", "auto", arrowSize)
+	draw.On(ren.Img, d, "auto", "auto", arrowSize)
 }
 
 var compstr = map[string]int{"x": 0, "y": 1, "z": 2}

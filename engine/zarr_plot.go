@@ -78,8 +78,10 @@ func (p *zTablePlot) update() {
 
 // Returns a png image plot of table data
 func zCreatePlot(table *DataTable, xcol, ycol string) (img []byte, err error) {
-	xdata := zTableTime.data
-	ydata := zTables[ycol].data[0]
+	// xdata := ZTableTime.Data
+	// ydata := ZTables[ycol].Data[0]
+	xdata := []float64{0}
+	ydata := []float64{0}
 	if (len(xdata) == 0) || (len(ydata) == 0) {
 		xdata = []float64{0}
 		ydata = []float64{0}

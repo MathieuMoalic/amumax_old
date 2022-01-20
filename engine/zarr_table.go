@@ -12,23 +12,24 @@ func init() {
 	DeclFunc("TableSave", ZTableSave, "Save the data table right now.")
 	DeclFunc("TableAdd", ZTableAdd, "Save the data table periodically.")
 	DeclFunc("TableAutoSave", ZTableAutoSave, "Save the data table periodically.")
-	ZTables = ZTablesStruct{Step: -1, AutoSavePeriod: 0.0, FlushInterval: 5 * time.Second}
+	ZTables = ZTablesStruct{Data: make(map[string][]float64), Step: -1, AutoSavePeriod: 0.0, FlushInterval: 5 * time.Second}
 }
 
 var ZTables ZTablesStruct
 
+// the Table is kept in RAM and used for the API
 type ZTablesStruct struct {
-	Tables         []ZTable `json:"Tables"`
-	Qs             []Quantity
-	AutoSavePeriod float64       `json:"AutoSavePeriod"`
-	AutoSaveStart  float64       `json:"AutoSaveStart"`
-	Step           int           `json:"Step"`
-	FlushInterval  time.Duration `json:"FlushInterval"`
+	qs             []Quantity
+	tables         []ZTable
+	Data           map[string][]float64 `json:"data"`
+	AutoSavePeriod float64              `json:"autoSavePeriod"`
+	AutoSaveStart  float64              `json:"autoSaveStart"`
+	Step           int                  `json:"step"`
+	FlushInterval  time.Duration        `json:"flushInterval"`
 }
 
 type ZTable struct {
-	Name   string    `json:"Name"`
-	Data   []float64 `json:"Data"`
+	Name   string
 	buffer []byte
 	io     httpfs.WriteCloseFlusher
 }
@@ -38,21 +39,23 @@ func (ts *ZTablesStruct) WriteToBuffer() {
 	// always save the current time
 	buf = append(buf, Time)
 	// for each quantity we append each component to the buffer
-	for _, q := range ts.Qs {
+	for _, q := range ts.qs {
 		buf = append(buf, AverageOf(q)...)
 	}
 	// size of buf should be same as size of []Ztable
 	for i, b := range buf {
-		ts.Tables[i].buffer = append(ts.Tables[i].buffer, zarr.Float64ToByte(b)...)
-		ts.Tables[i].Data = append(ts.Tables[i].Data, b)
+		ts.tables[i].buffer = append(ts.tables[i].buffer, zarr.Float64ToByte(b)...)
+		ts.Data[ts.tables[i].Name] = append(ts.Data[ts.tables[i].Name], b)
+		// ts.Tables[i].Data = append(ts.Tables[i].Data, b)
 	}
 }
 func (ts *ZTablesStruct) Flush() {
-	for i := range ts.Tables {
-		ts.Tables[i].io.Write(ts.Tables[i].buffer)
-		ts.Tables[i].buffer = []byte{}
-		ts.Tables[i].io.Flush()
-		zarr.SaveFileTableZarray(OD()+"table/"+ts.Tables[i].Name+"/.zarray", ts.Step)
+	// fmt.Println(ts.Data)
+	for i := range ts.tables {
+		ts.tables[i].io.Write(ts.tables[i].buffer)
+		ts.tables[i].buffer = []byte{}
+		ts.tables[i].io.Flush()
+		zarr.SaveFileTableZarray(OD()+"table/"+ts.tables[i].Name+"/.zarray", ts.Step)
 	}
 }
 func (ts *ZTablesStruct) NeedSave() bool {
@@ -65,7 +68,7 @@ func TableInit() {
 	util.FatalErr(err)
 	f, err := httpfs.Create(OD() + "table/t/0")
 	util.FatalErr(err)
-	ZTables.Tables = append(ZTables.Tables, ZTable{"t", []float64{}, []byte{}, f})
+	ZTables.tables = append(ZTables.tables, ZTable{"t", []byte{}, f})
 	go AutoFlush()
 
 }
@@ -87,23 +90,23 @@ func CreateTable(name string) ZTable {
 	util.FatalErr(err)
 	f, err := httpfs.Create(OD() + "table/" + name + "/0")
 	util.FatalErr(err)
-	return ZTable{Name: name, Data: []float64{}, buffer: []byte{}, io: f}
+	return ZTable{Name: name, buffer: []byte{}, io: f}
 }
 
 func ZTableAdd(q Quantity) {
-	if len(ZTables.Tables) == 0 {
+	if len(ZTables.tables) == 0 {
 		TableInit()
 	}
 	if ZTables.Step != -1 {
 		util.Fatal("Add Table Quantity BEFORE you save the table for the first time")
 	}
-	ZTables.Qs = append(ZTables.Qs, q)
+	ZTables.qs = append(ZTables.qs, q)
 	if q.NComp() == 1 {
-		ZTables.Tables = append(ZTables.Tables, CreateTable(NameOf(q)))
+		ZTables.tables = append(ZTables.tables, CreateTable(NameOf(q)))
 	} else {
 		suffixes := []string{"x", "y", "z"}
 		for comp := 0; comp < q.NComp(); comp++ {
-			ZTables.Tables = append(ZTables.Tables, CreateTable(NameOf(q)+suffixes[comp]))
+			ZTables.tables = append(ZTables.tables, CreateTable(NameOf(q)+suffixes[comp]))
 		}
 	}
 }

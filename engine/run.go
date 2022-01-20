@@ -188,7 +188,7 @@ func runWhile(condition func() bool, output bool) {
 
 // Runs as long as browser is connected to gui.
 func RunInteractive() {
-	gui_.RunInteractive()
+	GUI.RunInteractive()
 }
 
 // take one time step

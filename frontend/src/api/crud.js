@@ -9,6 +9,22 @@ export const getDir = async () => {
         console.error(error);
     }
 };
+export const getTables = async () => {
+    try {
+        const response = await Api.get("/tables");
+        return response;
+    } catch (error) {
+        console.error(error);
+    }
+};
+export const getImage = async () => {
+    try {
+        const response = await Api.get("/image");
+        return response;
+    } catch (error) {
+        console.error(error);
+    }
+};
 
 // export const getWord = async (word_id) => {
 //     try {

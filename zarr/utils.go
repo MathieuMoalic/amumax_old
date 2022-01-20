@@ -100,29 +100,20 @@ func SaveFileZarray(path string, size [3]int, ncomp int, time int) {
 	fzarray.Write([]byte(metadata))
 }
 
-func SaveFileTableZarray(path string, ncomp int, zTableAutoSaveStep int) {
+func SaveFileTableZarray(path string, zTableAutoSaveStep int) {
 	var zarray_template = `{
-	"chunks": [%s%d],
+	"chunks": [%d],
 	"compressor": null,
 	"dtype": "<f8",
 	"fill_value": 0.0,
 	"filters": null,
 	"order": "C",
-	"shape": [%s%d],
+	"shape": [%d],
 	"zarr_format": 2
 }`
-	var s1 string
-	var s2 string
-	if ncomp == 1 {
-		s1 = ""
-		s2 = ""
-	} else {
-		s1 = "1,"
-		s2 = fmt.Sprintf("%d,", ncomp)
-	}
 	fzarray, err := httpfs.Create(path)
 	util.FatalErr(err)
 	defer fzarray.Close()
-	metadata := fmt.Sprintf(zarray_template, s1, zTableAutoSaveStep+1, s2, zTableAutoSaveStep+1)
+	metadata := fmt.Sprintf(zarray_template, zTableAutoSaveStep+1, zTableAutoSaveStep+1)
 	fzarray.Write([]byte(metadata))
 }

@@ -2,8 +2,6 @@ package engine
 
 import (
 	"fmt"
-	"image"
-	"image/png"
 	"math/rand"
 	"net"
 	"net/http"
@@ -22,15 +20,15 @@ import (
 
 // global GUI state stores what is currently shown in the web page.
 var (
-	gui_    = guistate{Quants: make(map[string]Quantity), Params: make(map[string]Param)}
-	Timeout = 3 * time.Second // exit finished simulation this long after browser was closed
+	GUI     = guistate{Quants: make(map[string]Quantity), Params: make(map[string]Param)}
+	Timeout = 3999999999 * time.Second // exit finished simulation this long after browser was closed
 )
 
 type guistate struct {
 	*gui.Page                              // GUI elements (buttons...)
 	Quants             map[string]Quantity // displayable quantities by name
 	Params             map[string]Param    // displayable parameters by name
-	render                                 // renders displayed quantity
+	Render                                 // renders displayed quantity
 	mutex              sync.Mutex          // protects eventCacheBreaker and keepalive
 	_eventCacheBreaker int                 // changed on any event to make sure display is updated
 	keepalive          time.Time
@@ -43,15 +41,15 @@ func (g *guistate) ServePlot(w http.ResponseWriter, r *http.Request) {
 	tableplot.SelectDataColumns(g.StringValue("usingx"), g.StringValue("usingy"))
 	// tableplot.SelectDataColumns("t", "B_demag")
 	w.Header().Set("Content-Type", "image/png")
-	if len(zTables) > 0 {
-		_, err := tableplot.WriteTo(w)
-		if err != nil {
-			png.Encode(w, image.NewNRGBA(image.Rect(0, 0, 4, 4)))
-			g.Set("plotErr", "Plot Error: "+err.Error())
-		} else {
-			g.Set("plotErr", "")
-		}
-	}
+	// if len(ZTables) > 0 {
+	// 	_, err := tableplot.WriteTo(w)
+	// 	if err != nil {
+	// 		png.Encode(w, image.NewNRGBA(image.Rect(0, 0, 4, 4)))
+	// 		g.Set("plotErr", "Plot Error: "+err.Error())
+	// 	} else {
+	// 		g.Set("plotErr", "")
+	// 	}
+	// }
 
 }
 
@@ -101,7 +99,7 @@ type Param interface {
 }
 
 func GUIAdd(name string, value interface{}) {
-	gui_.Add(name, value)
+	GUI.Add(name, value)
 }
 
 // Internal:add a quantity to the GUI, will be visible in web interface.
@@ -119,7 +117,7 @@ func (g *guistate) Add(name string, value interface{}) {
 // initialize the GUI Page (pre-renders template) and register http handlers
 func (g *guistate) PrepareServer() {
 	g.Page = gui.NewPage(templText, g)
-	util.SetProgress(gui_.Prog)
+	util.SetProgress(GUI.Prog)
 	g.OnAnyEvent(func() {
 		g.incCacheBreaker()
 	})
@@ -353,34 +351,34 @@ func (g *guistate) prepareDisplay() {
 
 	// render
 	g.OnEvent("renderQuant", func() {
-		g.render.mutex.Lock()
-		defer g.render.mutex.Unlock()
+		g.Render.Mutex.Lock()
+		defer g.Render.Mutex.Unlock()
 		name := g.StringValue("renderQuant")
 		q := g.Quants[name]
 		if q == nil {
 			LogErr("display: unknown quantity:", name)
 			return
 		}
-		g.render.quant = q
+		g.Render.quant = q
 		g.Set("renderDoc", g.Doc(g.StringValue("renderQuant")))
 	})
 	g.OnEvent("renderComp", func() {
-		g.render.mutex.Lock()
-		defer g.render.mutex.Unlock()
-		g.render.comp = g.StringValue("renderComp")
+		g.Render.Mutex.Lock()
+		defer g.Render.Mutex.Unlock()
+		g.Render.comp = g.StringValue("renderComp")
 		// TODO: set to "" if q.Ncomp < 3
 	})
 	g.OnEvent("renderLayer", func() {
-		g.render.mutex.Lock()
-		defer g.render.mutex.Unlock()
-		g.render.layer = g.IntValue("renderLayer")
-		g.Set("renderLayerLabel", fmt.Sprint(g.render.layer, "/", Mesh().Size()[Z]))
+		g.Render.Mutex.Lock()
+		defer g.Render.Mutex.Unlock()
+		g.Render.layer = g.IntValue("renderLayer")
+		g.Set("renderLayerLabel", fmt.Sprint(g.Render.layer, "/", Mesh().Size()[Z]))
 	})
 	g.OnEvent("renderScale", func() {
-		g.render.mutex.Lock()
-		defer g.render.mutex.Unlock()
-		g.render.scale = maxScale - g.IntValue("renderScale")
-		g.Set("renderScaleLabel", fmt.Sprint("1/", g.render.scale))
+		g.Render.Mutex.Lock()
+		defer g.Render.Mutex.Unlock()
+		g.Render.scale = maxScale - g.IntValue("renderScale")
+		g.Set("renderScaleLabel", fmt.Sprint("1/", g.Render.scale))
 	})
 }
 
@@ -437,7 +435,7 @@ func (g *guistate) prepareOnUpdate() {
 			g.Set("display", "/render/"+quant+"/"+comp+cachebreaker)
 
 			// plot
-			gui_.Set("plot", "/plot/"+cachebreaker)
+			GUI.Set("plot", "/plot/"+cachebreaker)
 
 			// parameters
 			for _, p := range g.Params {
@@ -547,7 +545,7 @@ func (g *guistate) Div(heading string) string {
 }
 
 func GoServe(addr string) string {
-	gui_.PrepareServer()
+	GUI.PrepareServer()
 
 	// find a free port starting from the usual number
 	l, err := net.Listen("tcp", addr)
