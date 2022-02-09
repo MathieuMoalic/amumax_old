@@ -20,3 +20,4 @@ tmp/
 .vscode/
 *.zarr
 amumax
+cuda/*_wrapper.go
