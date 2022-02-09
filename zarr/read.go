@@ -1,10 +1,8 @@
 package zarr
 
 import (
-	"encoding/binary"
 	"encoding/json"
 	"io/ioutil"
-	"math"
 	"path"
 
 	"github.com/MathieuMoalic/amumax/data"
@@ -12,12 +10,6 @@ import (
 
 	"github.com/DataDog/zstd"
 )
-
-func Float32frombytes(bytes []byte) float32 {
-	bits := binary.LittleEndian.Uint32(bytes)
-	float := math.Float32frombits(bits)
-	return float
-}
 
 type JsonHell struct {
 	Chunks     [5]int
@@ -62,7 +54,7 @@ func Read(fname string) (s *data.Slice, err error) {
 		for iy := 0; iy < size[1]; iy++ {
 			for ix := 0; ix < size[1]; ix++ {
 				for c := 0; c < ncomp; c++ {
-					tensors[c][iz][iy][ix] = Float32frombytes(data[count*4 : (count+1)*4])
+					tensors[c][iz][iy][ix] = BytesToFloat32(data[count*4 : (count+1)*4])
 					count++
 				}
 			}

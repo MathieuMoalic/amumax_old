@@ -7,6 +7,7 @@ import (
 )
 
 var globalmesh_ data.Mesh // mesh for m and everything that has the same size
+var ZarrMeta zarr.MetaStruct
 
 func init() {
 	DeclFunc("SetGridSize", SetGridSize, `Sets the number of cells for X,Y,Z`)
@@ -80,8 +81,7 @@ func SetMesh(Nx, Ny, Nz int, cellSizeX, cellSizeY, cellSizeZ float64, pbcx, pbcy
 	lazy_gridsize = []int{Nx, Ny, Nz}
 	lazy_cellsize = []float64{cellSizeX, cellSizeY, cellSizeZ}
 	lazy_pbc = []int{pbcx, pbcy, pbcz}
-
-	zarr.SaveMetaStart(OD()+"/.zattrs", globalmesh_, Dt_si, StartTime)
+	ZarrMeta.Init(globalmesh_, OD())
 }
 
 func printf(f float64) float32 {

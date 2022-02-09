@@ -3,8 +3,9 @@ package engine
 // Relax tries to find the minimum energy state.
 
 import (
-	"github.com/MathieuMoalic/amumax/cuda"
 	"math"
+
+	"github.com/MathieuMoalic/amumax/cuda"
 )
 
 //Stopping relax Maxtorque in T. The user can check MaxTorque for sane values (e.g. 1e-3).
@@ -106,6 +107,6 @@ func relaxSteps(n int) {
 	stop := NSteps + n
 	cond := func() bool { return NSteps < stop }
 	const output = false
-	runWhile(cond, output)
+	RunWhileInner(cond, output)
 	Time = t0
 }

@@ -21,6 +21,7 @@ func init() {
 	DeclFunc("AutoSave", zAutoSave, "Auto save space-dependent quantity every period (s) as the zarr standard.")
 	DeclFunc("SaveAs", zSaveAs, "Save space-dependent quantity as the zarr standard.")
 	DeclFunc("Save", zSave, "Save space-dependent quantity as the zarr standard.")
+	// DeclFunc("Savec", zSavec, "Save space-dependent quantity as the zarr standard.")
 }
 
 var zGroups []string
@@ -123,3 +124,66 @@ func zSyncSave(array *data.Slice, qname string, time int) {
 	//.zarray file
 	zarr.SaveFileZarray(fmt.Sprintf(OD()+"%s/.zarray", qname), size, ncomp, time+1)
 }
+
+// func zSavec(q Quantity) {
+// 	name := NameOf(q)
+// 	if _, ok := zArrays[name]; !ok {
+// 		zInitArray(name, q, 0)
+// 	}
+// 	zArrays[name].times = append(zArrays[name].times, Time)
+// 	zArrays[name].SaveAttrs()
+// 	buffer := ValueOf(q)
+// 	defer cuda.Recycle(buffer)
+// 	data := buffer.HostCopy() // must be copy (async io)
+// 	t := zArrays[name].count  // no desync this way
+// 	queOutput(func() { zSyncSavec(data, name, t) })
+// 	zArrays[name].count++
+
+// }
+
+// func zSyncSavec(array *data.Slice, qname string, time int) {
+// 	// f, err := httpfs.Create(fmt.Sprintf(OD()+"%s/%d.0.0.0.0", qname, time+1))
+// 	// util.FatalErr(err)
+// 	// defer f.Close()
+// 	data := array.Tensors()
+// 	size := array.Size()
+// 	ncomp := array.NComp()
+
+// 	tchunk := 5
+// 	// zchunk := size[Z]
+// 	ychunk := size[Y] / 32
+// 	xchunk := size[X] / 32
+
+// 	for iy := 0; iy < ychunk; iy++ {
+// 		for ix := 0; ix < xchunk; ix++ {
+// 			if (time % tchunk) == 0 {
+// 				f, err := httpfs.Create(fmt.Sprintf(OD()+"%s/%d.0.0.0.0", qname, time+1))
+// 				util.FatalErr(err)
+
+// 			}
+// 		}
+// 	}
+
+// 	var bdata []byte
+// 	var bytes []byte
+
+// 	for iz := 0; iz < size[Z]; iz++ {
+// 		for iy := 0; iy < size[Y]; iy++ {
+// 			for ix := 0; ix < size[X]; ix++ {
+// 				for c := 0; c < ncomp; c++ {
+// 					bytes = (*[4]byte)(unsafe.Pointer(&data[c][iz][iy][ix]))[:]
+// 					for k := 0; k < 4; k++ {
+// 						bdata = append(bdata, bytes[k])
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}
+// 	// CompressLevel(dst, src []byte, level int) // alternative with compress levels
+// 	// compressedData, err := zstd.Compress(nil, bdata)
+// 	// util.FatalErr(err)
+// 	// f.Write(compressedData)
+
+// 	//.zarray file
+// 	// zarr.SaveFileZarray(fmt.Sprintf(OD()+"%s/.zarray", qname), size, ncomp, time+1)
+// }

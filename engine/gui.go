@@ -35,21 +35,6 @@ type guistate struct {
 }
 
 func (g *guistate) ServePlot(w http.ResponseWriter, r *http.Request) {
-	if tableplot == nil {
-		tableplot = zNewPlot(&Table)
-	}
-	tableplot.SelectDataColumns(g.StringValue("usingx"), g.StringValue("usingy"))
-	// tableplot.SelectDataColumns("t", "B_demag")
-	w.Header().Set("Content-Type", "image/png")
-	// if len(ZTables) > 0 {
-	// 	_, err := tableplot.WriteTo(w)
-	// 	if err != nil {
-	// 		png.Encode(w, image.NewNRGBA(image.Rect(0, 0, 4, 4)))
-	// 		g.Set("plotErr", "Plot Error: "+err.Error())
-	// 	} else {
-	// 		g.Set("plotErr", "")
-	// 	}
-	// }
 
 }
 

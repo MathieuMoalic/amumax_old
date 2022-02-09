@@ -20,7 +20,6 @@ import (
 
 	"github.com/MathieuMoalic/amumax/cuda/cu"
 	"github.com/MathieuMoalic/amumax/timer"
-	"github.com/MathieuMoalic/amumax/zarr"
 )
 
 const VERSION = "Amumax, fork of mumax 3.10"
@@ -53,16 +52,14 @@ func GetBusy() bool {
 // Cleanly exits the simulation, assuring all output is flushed.
 func Close() {
 	drainOutput()
-	LogOut("********************** Simulation Ended ************************//")
+	LogOut("**************** Simulation Ended ******************//")
 	Table.flush()
-	if len(ZTables.tables) == 0 {
-		ZTables.Flush()
-	}
+	ZTables.Flush()
 	if logfile != nil {
 		logfile.Close()
 	}
 	if *Flag_sync {
 		timer.Print(os.Stdout)
 	}
-	zarr.SaveMetaEnd(OD()+"/.zattrs", globalmesh_, Dt_si, StartTime)
+	ZarrMeta.End()
 }

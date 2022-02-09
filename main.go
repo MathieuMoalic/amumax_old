@@ -10,7 +10,6 @@ import (
 	"path"
 	"time"
 
-	"github.com/MathieuMoalic/amumax/api"
 	"github.com/MathieuMoalic/amumax/cuda"
 	"github.com/MathieuMoalic/amumax/engine"
 	"github.com/MathieuMoalic/amumax/script"
@@ -50,7 +49,7 @@ func main() {
 		vet()
 		return
 	}
-	go api.Start()
+	// go api.Start()
 	switch flag.NArg() {
 	case 0:
 		if *engine.Flag_interactive {

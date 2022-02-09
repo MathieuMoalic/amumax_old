@@ -152,8 +152,8 @@ func CalcDemagKernel(inputSize, pbc [3]int, cellsize [3]float64, accuracy float6
 	progress, progmax := 0, (1+(r2[Y]-r1[Y]))*(1+(r2[Z]-r1[Z])) // progress bar
 	done := make(chan struct{}, 3)                              // parallel calculation of one component done?
 
-	var bar zarr.Bar
-	bar.NewOption(0, int64(progmax))
+	ProgressBar := zarr.ProgressBar{}
+	ProgressBar.New(0, float64(progmax))
 	// Start brute integration
 	// 9 nested loops, does that stress you out?
 	// Fortunately, the 5 inner ones usually loop over just one element.
@@ -183,8 +183,7 @@ func CalcDemagKernel(inputSize, pbc [3]int, cellsize [3]float64, accuracy float6
 
 					if s == 0 { // show progress of only one component
 						progress++
-						// util.Progress(progress, progmax, "Calculating demag kernel")
-						bar.Play(int64(progress))
+						ProgressBar.Update(float64(progress))
 					}
 
 					yw := wrap(y, size[Y])

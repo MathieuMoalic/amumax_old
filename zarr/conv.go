@@ -11,8 +11,14 @@ func Float64ToByte(f float64) []byte {
 	return buf[:]
 }
 
-func Float64frombytes(bytes []byte) float64 {
+func BytesToFloat64(bytes []byte) float64 {
 	bits := binary.LittleEndian.Uint64(bytes)
 	float := math.Float64frombits(bits)
+	return float
+}
+
+func BytesToFloat32(bytes []byte) float32 {
+	bits := binary.LittleEndian.Uint32(bytes)
+	float := math.Float32frombits(bits)
 	return float
 }
