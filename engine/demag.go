@@ -3,6 +3,8 @@ package engine
 // Calculation of magnetostatic field
 
 import (
+	"fmt"
+
 	"github.com/MathieuMoalic/amumax/cuda"
 	"github.com/MathieuMoalic/amumax/data"
 	"github.com/MathieuMoalic/amumax/mag"
@@ -102,6 +104,9 @@ func demagConv() *cuda.DemagConvolution {
 	if conv_ == nil {
 		SetBusy(true)
 		defer SetBusy(false)
+		// these 2 lines make sure the progress bar doesn't break when calculating the kernel
+		fmt.Print("\r                                                        ")
+		fmt.Print("\r")
 		kernel := mag.DemagKernel(Mesh().Size(), Mesh().PBC(), Mesh().CellSize(), DemagAccuracy, *Flag_cachedir)
 		conv_ = cuda.NewDemag(Mesh().Size(), Mesh().PBC(), kernel, *Flag_selftest)
 	}

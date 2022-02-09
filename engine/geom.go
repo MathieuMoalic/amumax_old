@@ -89,15 +89,10 @@ func (geometry *geom) setGeom(s Shape) {
 	c := geometry.Mesh().CellSize()
 	cx, cy, cz := c[X], c[Y], c[Z]
 
-	// progress, progmax := 0, n[Y]*n[Z]
 	fmt.Println("Initializing geometry")
 	var ok bool
 	for iz := 0; iz < n[Z]; iz++ {
 		for iy := 0; iy < n[Y]; iy++ {
-
-			// progress++
-			// util.Progress(progress, progmax, "Initializing geometry")
-
 			for ix := 0; ix < n[X]; ix++ {
 
 				r := Index2Coord(ix, iy, iz)

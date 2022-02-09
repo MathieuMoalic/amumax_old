@@ -8,6 +8,7 @@ import (
 	"github.com/MathieuMoalic/amumax/cuda"
 	"github.com/MathieuMoalic/amumax/data"
 	"github.com/MathieuMoalic/amumax/util"
+	"github.com/MathieuMoalic/amumax/zarr"
 )
 
 // Solver globals
@@ -27,10 +28,11 @@ var (
 	FixDt                   float64                      // fixed time step?
 	stepper                 Stepper                      // generic step, can be EulerStep, HeunStep, etc
 	solvertype              int
+	ProgressBar             zarr.ProgressBar
 )
 
 func init() {
-	DeclFunc("Run", Run, "Run the simulation for a time in seconds")
+	DeclFunc("Run", Run2, "Run the simulation for a time in seconds")
 	DeclFunc("Steps", Steps, "Run the simulation for a number of time steps")
 	DeclFunc("RunWhile", RunWhile, "Run while condition function is true")
 	DeclFunc("SetSolver", SetSolver, "Set solver type. 1:Euler, 2:Heun, 3:Bogaki-Shampine, 4: Runge-Kutta (RK45), 5: Dormand-Prince, 6: Fehlberg, -1: Backward Euler")
@@ -157,6 +159,33 @@ func Run(seconds float64) {
 	RunWhile(func() bool { return Time < stop })
 }
 
+// Run the simulation for a number of seconds.
+func Run2(seconds float64) {
+	start := Time
+	stop := Time + seconds
+	alarm = stop // don't have dt adapt to go over alarm
+	SanityCheck()
+	pause = false // may be set by <-Inject
+	const output = true
+	stepper.Free() // start from a clean state
+
+	DoOutput() // allow t=0 output
+	ProgressBar = zarr.ProgressBar{}
+	ProgressBar.New(start, stop)
+	for (Time < stop) && !pause {
+		select {
+		default:
+			ProgressBar.Update(Time)
+			step(output)
+		// accept tasks form Inject channel
+		case f := <-Inject:
+			f()
+		}
+	}
+	ProgressBar.Finish()
+	pause = true
+}
+
 // Run the simulation for a number of steps.
 func Steps(n int) {
 	stop := NSteps + n
@@ -169,11 +198,11 @@ func RunWhile(condition func() bool) {
 	pause = false // may be set by <-Inject
 	const output = true
 	stepper.Free() // start from a clean state
-	runWhile(condition, output)
+	RunWhileInner(condition, output)
 	pause = true
 }
 
-func runWhile(condition func() bool, output bool) {
+func RunWhileInner(condition func() bool, output bool) {
 	DoOutput() // allow t=0 output
 	for condition() && !pause {
 		select {

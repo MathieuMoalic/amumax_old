@@ -1,42 +1,31 @@
 package zarr
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
-type Bar struct {
-	percent int64  // progress percentage
-	cur     int64  // current progress
-	total   int64  // total value for progress
-	rate    string // the actual progress bar to be printed
-	graph   string // the fill value for progress bar
+type ProgressBar struct {
+	start float64
+	stop  float64
+	last  int
 }
 
-func (bar *Bar) NewOption(start, total int64) {
-	bar.cur = start
-	bar.total = total
-	if bar.graph == "" {
-		bar.graph = "█"
+func (bar *ProgressBar) New(start float64, stop float64) {
+	bar.start = start
+	bar.stop = stop
+	bar.last = 0
+}
+
+func (bar *ProgressBar) Update(current float64) {
+	p := int((current-bar.start)/(bar.stop-bar.start)*100) + 1
+	if p > bar.last {
+		bar.last = p
+		fmt.Printf("\r[%-50s]%3d%%", strings.Repeat("█", p/2), p)
 	}
-	bar.percent = bar.getPercent()
-	for i := 0; i < int(bar.percent); i += 2 {
-		bar.rate += bar.graph // initial progress position
-	}
-}
-
-func (bar *Bar) getPercent() int64 {
-	return int64((float32(bar.cur) / float32(bar.total)) * 100)
-}
-
-func (bar *Bar) Play(cur int64) {
-	bar.cur = cur
-	last := bar.percent
-	bar.percent = bar.getPercent()
-	if bar.percent != last && bar.percent%2 == 0 {
-		bar.rate += bar.graph
-	}
-	fmt.Printf("\r[%-50s]%3d%%", bar.rate, bar.percent)
 
 }
 
-func (bar *Bar) Finish() {
+func (bar *ProgressBar) Finish() {
 	fmt.Println()
 }
