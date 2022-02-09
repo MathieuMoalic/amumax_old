@@ -3,19 +3,29 @@
 	import TitleBar from "./components/TitleBar.svelte";
 	import Plot from "./components/Plot.svelte";
 	import Display from "./components/Display.svelte";
+	import Console from "./components/Console.svelte";
+	import Mesh from "./components/Mesh.svelte";
+	import Geometry from "./components/Geometry.svelte";
+	import Solver from "./components/Solver.svelte";
+	import Parameters from "./components/Parameters.svelte";
+	import { title } from "./stores.js";
 </script>
 
 <Styles />
 
+<svelte:head>
+	<title>{$title}</title>
+</svelte:head>
+
 <body class="grid-container">
-	<!-- <div style="grid-area: titlebar;">titlebar <TitleBar /></div> -->
-	<div style="grid-area: console;">console</div>
-	<div style="grid-area: mesh;">mesh</div>
-	<div style="grid-area: geometry;">geometry</div>
-	<div style="grid-area: solver;">solver</div>
-	<div style="grid-area: display;"><Display /></div>
-	<!-- <div style="grid-area: plot;"><Plot /></div> -->
-	<div style="grid-area: parameters;">parameters</div>
+	<div style="grid-area: titlebar;"><TitleBar /></div>
+	<div style="grid-area: console;"><Console /></div>
+	<div style="grid-area: mesh;"><Mesh /></div>
+	<div style="grid-area: geometry;"><Geometry /></div>
+	<div style="grid-area: solver;"><Solver /></div>
+	<div style="grid-area: display;">Display</div>
+	<div style="grid-area: plot;">Plot</div>
+	<div style="grid-area: parameters;"><Parameters /></div>
 </body>
 
 <style>
